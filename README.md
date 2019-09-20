@@ -19,6 +19,3 @@ make -j
 ```bash
 make dev
 ```
-
-## Head Ups
-- remove app/target and enclave/target for fresh build
