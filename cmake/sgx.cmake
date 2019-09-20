@@ -32,4 +32,5 @@ set(enclaveLib ${enclave}.signed.so)
 set(key ${enclavePath}/isv.pem)
 
 # rust-sgx-sdk
-set(rustSGXPath /rust-sgx-sdk)
+#set(rustSGXPath /rust-sgx-sdk)
+set(rustSGXPath ${PROJECT_SOURCE_DIR}/vendor/rust-sgx-sdk)

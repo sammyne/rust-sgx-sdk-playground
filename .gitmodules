@@ -1,0 +1,4 @@
+[submodule "vendor/rust-sgx-sdk"]
+	path = vendor/rust-sgx-sdk
+	url = https://github.com/baidu/rust-sgx-sdk.git
+	branch = 407cbaaf42939aab78bd8afa14de93fab270f7aa
