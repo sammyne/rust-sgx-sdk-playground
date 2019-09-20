@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
 set(rustSGXPath /rust-sgx-sdk)
-set(uAppLib enclave_u)
 
 # must
 set(rtsLib sgx_urts${enclaveLibSuffix})
@@ -11,6 +10,9 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${sgxFlags} \
 
 set(bridgeImpl ${CMAKE_CURRENT_BINARY_DIR}/${enclave}_u.c) 
 set(bridge ${CMAKE_CURRENT_BINARY_DIR}/${enclave}_u.h ${bridgeImpl})
+
+set(uBridgeLib enclave_u)
+set(uBridgeLibPath ${CMAKE_CURRENT_BINARY_DIR})
 
 include_directories(
     ${rustSGXPath}/edl
@@ -26,19 +28,14 @@ add_custom_command(
     COMMENT "[GEN] => ${bridge}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
-add_library(${uAppLib} STATIC ${bridgeImpl})
-
-add_custom_command(TARGET ${uAppLib} POST_BUILD
-    COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/lib${uAppLib}.a ${CMAKE_SOURCE_DIR}/lib
-    COMMENT "[COPY] ${CMAKE_CURRENT_BINARY_DIR}/lib${uAppLib}.a ${CMAKE_SOURCE_DIR}/lib/"
-)
+add_library(${uBridgeLib} STATIC ${bridgeImpl})
 
 add_custom_target(app ALL
-    COMMAND SGX_SDK=${sgxPath} SGX_MODE=${SGX_MODE} cargo build --release
+    COMMAND SGX_SDK=${sgxPath} SGX_MODE=${SGX_MODE} BRIDGE_LIB_PATH=${uBridgeLibPath} 
+        cargo build --release
     COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/target/release/app ${CMAKE_CURRENT_BINARY_DIR}
-    BYPRODUCTS app
     COMMENT "[CARGO] app => ${CMAKE_CURRENT_BINARY_DIR}/app"
-    DEPENDS ${uAppLib}
+    DEPENDS ${uBridgeLib}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 

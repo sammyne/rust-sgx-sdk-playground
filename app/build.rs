@@ -35,7 +35,10 @@ fn main () {
     let is_sim = env::var("SGX_MODE")
                     .unwrap_or_else(|_| "HW".to_string());
 
-    println!("cargo:rustc-link-search=native=../lib");
+    let bridge_dir = env::var("BRIDGE_LIB_PATH")
+                    .unwrap_or_else(|_| ".".to_string());
+
+    println!("cargo:rustc-link-search=native={}", bridge_dir);
     println!("cargo:rustc-link-lib=static=enclave_u");
 
     println!("cargo:rustc-link-search=native={}/lib64", sdk_dir);
