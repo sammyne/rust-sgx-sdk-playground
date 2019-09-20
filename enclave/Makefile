@@ -32,16 +32,6 @@ Rust_Target_Path := $(CURDIR)/../../../xargo
 
 include ../conf.mk
 
-#$(Rust_Enclave_Name): $(Rust_Enclave_Files)
-#ifeq ($(XARGO_SGX), 1)
-#	RUST_TARGET_PATH=$(Rust_Target_Path) xargo build --target x86_64-unknown-linux-sgx --release
-#	cp ./target/x86_64-unknown-linux-sgx/release/libhelloworldsampleenclave.a ../lib/libenclave.a
-#else
-#	cargo build --release
-#	cp ./target/release/libhelloworldsampleenclave.a ../lib/libenclave.a
-#endif
-#$(Rust_Enclave_Name): $(Rust_Enclave_Files)
-
 ######## Enclave Settings ########
 
 ifneq ($(SGX_MODE), HW)
@@ -100,10 +90,6 @@ $(Signed_RustEnclave_Name): $(RustEnclave_Name)
 	@mv $(Signed_RustEnclave_Name) ../bin
 	@echo "SIGN =>  $@"
 
-#.PHONY: enclave
-#enclave:
-#	$(MAKE) -C ././
-
 .PHONY: compiler-rt
 compiler-rt:
 	$(MAKE) -C ${rustSGXPath}/compiler-rt/ 2> /dev/null
@@ -117,3 +103,10 @@ clean:
 $(Rust_Enclave_Name): 
 	cargo build --release
 	cp ./target/release/libhelloworldsampleenclave.a ../lib/libenclave.a
+#ifeq ($(XARGO_SGX), 1)
+#	RUST_TARGET_PATH=$(Rust_Target_Path) xargo build --target x86_64-unknown-linux-sgx --release
+#	cp ./target/x86_64-unknown-linux-sgx/release/libhelloworldsampleenclave.a ../lib/libenclave.a
+#else
+#	cargo build --release
+#	cp ./target/release/libhelloworldsampleenclave.a ../lib/libenclave.a
+#endif

@@ -4,6 +4,7 @@
 name = "Helloworldsampleenclave"
 version = "1.0.0"
 dependencies = [
+ "sgx_tprotected_fs 1.0.9 (git+https://github.com/baidu/rust-sgx-sdk.git)",
  "sgx_tstd 1.0.9 (git+https://github.com/baidu/rust-sgx-sdk.git)",
  "sgx_types 1.0.9 (git+https://github.com/baidu/rust-sgx-sdk.git)",
 ]
