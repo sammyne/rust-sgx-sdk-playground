@@ -11,7 +11,9 @@ set(cryptoLib sgx_tcrypto)
 set(fsLib sgx_tprotected_fs)
 set(kxLib sgx_tkey_exchange)
 
-set(addonLibPath ${CMAKE_SOURCE_DIR}/lib)
+#set(addonLibPath ${CMAKE_SOURCE_DIR}/lib)
+set(addonLibPath ${CMAKE_CURRENT_BINARY_DIR})
+set(rustEnclaveLib "enclave_rust")
 
 ## rust sdk must come before official SGX
 include_directories(
@@ -38,7 +40,7 @@ set(LDFLAGS "-Wl,--no-undefined \
 	-L${sgxLibPath} \
 	-Wl,--whole-archive -l${rtsLib} -Wl,--no-whole-archive \
 	-Wl,--start-group -l${cLib} -l${serviceLib} -l${cryptoLib} -l${cxxLib} \
-    -L${addonLibPath} -lcompiler-rt-patch -lenclave \
+    -L${addonLibPath} -lcompiler-rt-patch -l${rustEnclaveLib} \
     -Wl,--end-group \
     -Wl,-Bstatic -Wl,-Bsymbolic -Wl,--no-undefined -Wl,-pie,-eenclave_entry \
     -Wl,--export-dynamic -Wl,--defsym,__ImageBase=0 -Wl,--gc-sections \
@@ -64,14 +66,15 @@ target_link_libraries(${enclave} ${LDFLAGS})
 add_custom_command(TARGET ${enclave} PRE_BUILD
     BYPRODUCTS ${CMAKE_SOURCE_DIR}/libcompiler-rt-patch.a
     COMMAND make -C ${rustSGXPath}/compiler-rt 
-    COMMAND cp ${rustSGXPath}/compiler-rt/libcompiler-rt-patch.a ${CMAKE_SOURCE_DIR}/lib
+    COMMAND cp ${rustSGXPath}/compiler-rt/libcompiler-rt-patch.a 
+        ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "[PACK] compiler runtime for rust-sgx-sdk"
 )
 
 add_custom_command(TARGET ${enclave} PRE_BUILD
-    BYPRODUCTS ${CMAKE_SOURCE_DIR}/libenclave.a
     COMMAND cargo build --release
-    COMMAND cp ${enclavePath}/target/release/libhelloworldsampleenclave.a ${CMAKE_SOURCE_DIR}/lib/libenclave.a
+    COMMAND cp ${enclavePath}/target/release/libhelloworldsampleenclave.a 
+        ${CMAKE_CURRENT_BINARY_DIR}/lib${rustEnclaveLib}.a
     COMMENT "[PACK] enclave"
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )

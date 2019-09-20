@@ -30,13 +30,14 @@ add_library(${uAppLib} STATIC ${bridgeImpl})
 
 add_custom_command(TARGET ${uAppLib} POST_BUILD
     COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/lib${uAppLib}.a ${CMAKE_SOURCE_DIR}/lib
+    COMMENT "[COPY] ${CMAKE_CURRENT_BINARY_DIR}/lib${uAppLib}.a ${CMAKE_SOURCE_DIR}/lib/"
 )
 
 add_custom_target(app ALL
     COMMAND SGX_SDK=${sgxPath} cargo build --release
     COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/target/release/app ${CMAKE_SOURCE_DIR}/bin
     BYPRODUCTS app
-    COMMENT "[GEN] cargo => app"
+    COMMENT "[CARGO] app"
     DEPENDS ${uAppLib}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
