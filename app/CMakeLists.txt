@@ -35,9 +35,15 @@ add_custom_command(TARGET ${uAppLib} POST_BUILD
 
 add_custom_target(app ALL
     COMMAND SGX_SDK=${sgxPath} SGX_MODE=${SGX_MODE} cargo build --release
-    COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/target/release/app ${CMAKE_SOURCE_DIR}/bin
+    COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/target/release/app ${CMAKE_CURRENT_BINARY_DIR}
     BYPRODUCTS app
-    COMMENT "[CARGO] app"
+    COMMENT "[CARGO] app => ${CMAKE_CURRENT_BINARY_DIR}/app"
     DEPENDS ${uAppLib}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+add_custom_target(dev
+    ${CMAKE_CURRENT_BINARY_DIR}/app ${CMAKE_BINARY_DIR}/enclave/enclave.signed.so
+    DEPENDS app enclave
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )

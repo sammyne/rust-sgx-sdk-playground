@@ -36,7 +36,7 @@ use std::io::{Read, Write};
 use std::fs;
 use std::path;
 
-static ENCLAVE_FILE: &'static str = "enclave.signed.so";
+//static ENCLAVE_FILE: &'static str = "enclave.signed.so";
 static ENCLAVE_TOKEN: &'static str = "enclave.token";
 
 extern {
@@ -44,7 +44,7 @@ extern {
                      some_string: *const u8, len: usize) -> sgx_status_t;
 }
 
-fn init_enclave() -> SgxResult<SgxEnclave> {
+fn init_enclave(enclave_path: &str) -> SgxResult<SgxEnclave> {
 
     let mut launch_token: sgx_launch_token_t = [0; 1024];
     let mut launch_token_updated: i32 = 0;
@@ -87,7 +87,7 @@ fn init_enclave() -> SgxResult<SgxEnclave> {
     // Debug Support: set 2nd parameter to 1
     let debug = 1;
     let mut misc_attr = sgx_misc_attribute_t {secs_attr: sgx_attributes_t { flags:0, xfrm:0}, misc_select:0};
-    let enclave = try!(SgxEnclave::create(ENCLAVE_FILE,
+    let enclave = try!(SgxEnclave::create(enclave_path,
                                           debug,
                                           &mut launch_token,
                                           &mut launch_token_updated,
@@ -113,8 +113,14 @@ fn init_enclave() -> SgxResult<SgxEnclave> {
 }
 
 fn main() {
+    let args: Vec<String> = std::env::args().collect();
 
-    let enclave = match init_enclave() {
+    if args.len() < 2 {
+        println!("missing enclave path");
+        std::process::exit(-1);
+    }
+
+    let enclave = match init_enclave(&args[1]) {
         Ok(r) => {
             println!("[+] Init Enclave Successful {}!", r.geteid());
             r
