@@ -36,7 +36,7 @@ fn main () {
                     .unwrap_or_else(|_| "HW".to_string());
 
     println!("cargo:rustc-link-search=native=../lib");
-    println!("cargo:rustc-link-lib=static=Enclave_u");
+    println!("cargo:rustc-link-lib=static=enclave_u");
 
     println!("cargo:rustc-link-search=native={}/lib64", sdk_dir);
     match is_sim.as_ref() {

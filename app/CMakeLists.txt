@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 set(rustSGXPath /rust-sgx-sdk)
-set(uAppLib Enclave_u)
+set(uAppLib enclave_u)
 
 # must
 set(rtsLib sgx_urts${enclaveLibSuffix})
@@ -46,4 +46,13 @@ add_custom_target(dev
     ${CMAKE_CURRENT_BINARY_DIR}/app ${CMAKE_BINARY_DIR}/enclave/enclave.signed.so
     DEPENDS app enclave
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+## add on clean by Rust
+#get_directory_property(_oldToClean ADDITIONAL_MAKE_CLEAN_FILES)
+#list(APPEND _oldToClean ${CMAKE_CURRENT_SOURCE_DIR}/target)
+#set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${_oldToClean}")
+
+set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES 
+    "${CMAKE_CURRENT_SOURCE_DIR}/target"
 )
