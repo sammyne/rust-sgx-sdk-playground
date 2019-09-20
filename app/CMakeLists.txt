@@ -34,7 +34,7 @@ add_custom_command(TARGET ${uAppLib} POST_BUILD
 )
 
 add_custom_target(app ALL
-    COMMAND SGX_SDK=${sgxPath} cargo build --release
+    COMMAND SGX_SDK=${sgxPath} SGX_MODE=${SGX_MODE} cargo build --release
     COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/target/release/app ${CMAKE_SOURCE_DIR}/bin
     BYPRODUCTS app
     COMMENT "[CARGO] app"

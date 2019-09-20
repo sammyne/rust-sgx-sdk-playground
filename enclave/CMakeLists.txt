@@ -65,14 +65,14 @@ target_link_libraries(${enclave} ${LDFLAGS})
 
 add_custom_command(TARGET ${enclave} PRE_BUILD
     BYPRODUCTS ${CMAKE_SOURCE_DIR}/libcompiler-rt-patch.a
-    COMMAND make -C ${rustSGXPath}/compiler-rt 
+    COMMAND SGX_MODE=${SGX_MODE} make -C ${rustSGXPath}/compiler-rt 
     COMMAND cp ${rustSGXPath}/compiler-rt/libcompiler-rt-patch.a 
         ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "[PACK] compiler runtime for rust-sgx-sdk"
 )
 
 add_custom_command(TARGET ${enclave} PRE_BUILD
-    COMMAND cargo build --release
+    COMMAND SGX_MODE=${SGX_MODE} cargo build --release
     COMMAND cp ${enclavePath}/target/release/libhelloworldsampleenclave.a 
         ${CMAKE_CURRENT_BINARY_DIR}/lib${rustEnclaveLib}.a
     COMMENT "[PACK] enclave"
