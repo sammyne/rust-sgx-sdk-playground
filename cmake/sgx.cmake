@@ -14,7 +14,6 @@ else()
    message(FATAL_ERROR "unknown build type: ${CMAKE_BUILD_TYPE}")
 endif()
 
-#set(sgxPath /opt/intel/sgxsdk)
 set(sgxPath /opt/sgxsdk)
 set(sgxLibPath ${sgxPath}/lib64)
 
@@ -31,3 +30,6 @@ set(config ${enclavePath}/${enclave}.config.xml)
 set(edl enclave.edl)
 set(enclaveLib ${enclave}.signed.so)
 set(key ${enclavePath}/isv.pem)
+
+# rust-sgx-sdk
+set(rustSGXPath /rust-sgx-sdk)

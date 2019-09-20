@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
 
-set(rustSGXPath /rust-sgx-sdk)
-
 set(rtsLib sgx_trts${enclaveLibSuffix})
 set(serviceLib sgx_tservice${enclaveLibSuffix})
 
