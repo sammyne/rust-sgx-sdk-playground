@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.10)
 
 if(CMAKE_BUILD_TYPE MATCHES "Debug" OR CMAKE_BUILD_TYPE MATCHES "")
    set(sgxFlags "-m64 -O0 -g")
@@ -11,7 +11,8 @@ else()
    message(FATAL_ERROR "unknown build type: ${CMAKE_BUILD_TYPE}")
 endif()
 
-set(sgxPath /opt/intel/sgxsdk)
+#set(sgxPath /opt/intel/sgxsdk)
+set(sgxPath /opt/sgxsdk)
 set(sgxLibPath ${sgxPath}/lib64)
 
 # tools
