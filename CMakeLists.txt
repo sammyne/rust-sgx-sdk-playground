@@ -5,8 +5,9 @@ project(hello-rust-sgx)
 include(cmake/sgx.cmake)
 
 add_subdirectory(enclave)
+add_subdirectory(app)
 
-add_custom_target(makeApp ALL make -C ./app
-    COMMENT "[GEN] app"
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-)
+#add_custom_target(makeApp ALL make -C ./app
+#    COMMENT "[GEN] app"
+#    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+#)

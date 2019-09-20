@@ -80,5 +80,6 @@ add_custom_command(TARGET ${enclave} POST_BUILD
     BYPRODUCTS ${enclaveLib} 
     COMMAND ${sgxSigner} sign -key ${key} -enclave lib${enclave}.so 
         -out ${enclaveLib} -config ${config}
+    COMMAND cp ${enclaveLib} ${CMAKE_SOURCE_DIR}/bin
     COMMENT "[SIGN] lib${enclave}.so => ${enclaveLib}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
