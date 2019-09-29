@@ -9,7 +9,6 @@ set(cryptoLib sgx_tcrypto)
 set(fsLib sgx_tprotected_fs)
 set(kxLib sgx_tkey_exchange)
 
-#set(addonLibPath ${CMAKE_SOURCE_DIR}/lib)
 set(addonLibPath ${CMAKE_CURRENT_BINARY_DIR})
 set(rustEnclaveLib "enclave_rust")
 
@@ -44,8 +43,8 @@ set(LDFLAGS "-Wl,--no-undefined \
     -Wl,--export-dynamic -Wl,--defsym,__ImageBase=0 -Wl,--gc-sections \
     -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/enclave.lds")
 
-set(bridgeImpl ${CMAKE_CURRENT_BINARY_DIR}/${enclave}_t.c) 
-set(bridge ${CMAKE_CURRENT_BINARY_DIR}/${enclave}_t.h ${bridgeImpl})
+set(bridgeImpl ${CMAKE_CURRENT_BINARY_DIR}/enclave_t.c) 
+set(bridge ${CMAKE_CURRENT_BINARY_DIR}/enclave_t.h ${bridgeImpl})
 
 set(srcs ${bridgeImpl})
 

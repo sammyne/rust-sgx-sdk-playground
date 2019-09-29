@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(hello-rust-sgx)
+project(rust-sgx-sdk-playground)
 
 include(cmake/sgx.cmake)
 
-add_subdirectory(enclave)
-add_subdirectory(app)
+add_subdirectory(hello-world)

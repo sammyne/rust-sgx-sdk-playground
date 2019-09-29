@@ -6,8 +6,8 @@ set(rtsLib sgx_urts${enclaveLibSuffix})
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${sgxFlags} \
     -fPIC -Wno-attributes")
 
-set(bridgeImpl ${CMAKE_CURRENT_BINARY_DIR}/${enclave}_u.c) 
-set(bridge ${CMAKE_CURRENT_BINARY_DIR}/${enclave}_u.h ${bridgeImpl})
+set(bridgeImpl ${CMAKE_CURRENT_BINARY_DIR}/enclave_u.c) 
+set(bridge ${CMAKE_CURRENT_BINARY_DIR}/enclave_u.h ${bridgeImpl})
 
 set(uBridgeLib enclave_u)
 set(uBridgeLibPath ${CMAKE_CURRENT_BINARY_DIR})
@@ -28,7 +28,7 @@ add_custom_command(
 
 add_library(${uBridgeLib} STATIC ${bridgeImpl})
 
-add_custom_target(app ALL
+add_custom_target(${app} ALL
     COMMAND SGX_SDK=${sgxPath} SGX_MODE=${SGX_MODE} BRIDGE_LIB_PATH=${uBridgeLibPath} 
         cargo build --release
     COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/target/release/app ${CMAKE_CURRENT_BINARY_DIR}
@@ -37,9 +37,9 @@ add_custom_target(app ALL
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_custom_target(dev
-    ${CMAKE_CURRENT_BINARY_DIR}/app ${CMAKE_BINARY_DIR}/enclave/enclave.signed.so
-    DEPENDS app enclave
+add_custom_target(${PROJECT_NAME}-dev
+    ${CMAKE_CURRENT_BINARY_DIR}/app ${CMAKE_CURRENT_BINARY_DIR}/../enclave/enclave.signed.so
+    DEPENDS ${app} ${enclave}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 
