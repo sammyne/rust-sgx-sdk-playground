@@ -28,17 +28,18 @@ add_custom_command(
 
 add_library(${uBridgeLib} STATIC ${bridgeImpl})
 
+set(appBin ${CMAKE_CURRENT_BINARY_DIR}/cargo/release/app)
+
 add_custom_target(${app} ALL
     COMMAND SGX_SDK=${sgxPath} SGX_MODE=${SGX_MODE} BRIDGE_LIB_PATH=${uBridgeLibPath} 
-        cargo build --release
-    COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/target/release/app ${CMAKE_CURRENT_BINARY_DIR}
-    COMMENT "[CARGO] app => ${CMAKE_CURRENT_BINARY_DIR}/app"
+        cargo build --release --target-dir=${CMAKE_CURRENT_BINARY_DIR}/cargo
+    COMMENT "[CARGO] app => ${appBin}"
     DEPENDS ${uBridgeLib}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 add_custom_target(${PROJECT_NAME}-dev
-    ${CMAKE_CURRENT_BINARY_DIR}/app ${CMAKE_CURRENT_BINARY_DIR}/../enclave/enclave.signed.so
+    ${appBin} ${CMAKE_CURRENT_BINARY_DIR}/../enclave/${enclaveLib}
     DEPENDS ${app} ${enclave}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )

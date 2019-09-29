@@ -69,14 +69,14 @@ add_custom_command(TARGET ${enclave} PRE_BUILD
 )
 
 add_custom_command(TARGET ${enclave} PRE_BUILD
-    COMMAND SGX_MODE=${SGX_MODE} cargo build --release
-    COMMAND cp ${enclavePath}/target/release/libhelloworldsampleenclave.a 
+    COMMAND SGX_MODE=${SGX_MODE} cargo build --release 
+        --target-dir ${CMAKE_CURRENT_BINARY_DIR}/cargo
+    COMMAND mv ${CMAKE_CURRENT_BINARY_DIR}/cargo/release/libenclave.a 
         ${CMAKE_CURRENT_BINARY_DIR}/lib${rustEnclaveLib}.a
     COMMENT "[PACK] enclave"
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-#    COMMAND cp ${enclaveLib} ${CMAKE_CURRENT_BINARY_DIR}
 add_custom_command(TARGET ${enclave} POST_BUILD
     BYPRODUCTS ${enclaveLib} 
     COMMAND ${sgxSigner} sign -key ${key} -enclave lib${enclave}.so 

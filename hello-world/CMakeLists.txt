@@ -11,7 +11,7 @@ set(enclave ${PROJECT_NAME}-enclave)
 
 set(config ${enclavePath}/enclave.config.xml)
 set(edl enclave.edl)
-set(enclaveLib enclave.signed.so)
+set(enclaveLib ${PROJECT_NAME}-enclave.signed.so)
 set(key ${enclavePath}/isv.pem)
 
 add_subdirectory(enclave)
