@@ -9,7 +9,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${sgxFlags} \
 set(bridgeImpl ${CMAKE_CURRENT_BINARY_DIR}/enclave_u.c) 
 set(bridge ${CMAKE_CURRENT_BINARY_DIR}/enclave_u.h ${bridgeImpl})
 
-set(uBridgeLib enclave_u)
+set(uBridgeLib ${PROJECT_NAME}-enclave_u)
 set(uBridgeLibPath ${CMAKE_CURRENT_BINARY_DIR})
 
 include_directories(

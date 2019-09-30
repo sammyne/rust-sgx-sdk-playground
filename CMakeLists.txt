@@ -4,5 +4,5 @@ project(rust-sgx-sdk-playground)
 
 include(cmake/sgx.cmake)
 
-#add_subdirectory(hello-world)
+add_subdirectory(hello-world)
 add_subdirectory(crypto)
