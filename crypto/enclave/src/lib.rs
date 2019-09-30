@@ -76,12 +76,12 @@ use std::vec::Vec;
 ///
 /// Indicates the parameter is invalid
 #[no_mangle]
-pub extern "C" fn calc_sha256(
+pub extern "C" fn ecall_sha256(
     input_str: *const u8,
     some_len: usize,
     hash: &mut [u8; 32],
 ) -> sgx_status_t {
-    println!("calc_sha256 invoked!");
+    println!("ecall_sha256 invoked!");
 
     // First, build a slice for input_str
     let input_slice = unsafe { slice::from_raw_parts(input_str, some_len) };

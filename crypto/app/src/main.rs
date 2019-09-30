@@ -39,15 +39,29 @@ use std::{fs, path};
 static ENCLAVE_TOKEN: &'static str = "enclave.token";
 
 extern "C" {
-    //fn say_something(eid: sgx_enclave_id_t, retval: *mut sgx_status_t,
-    //                 some_string: *const u8, len: usize) -> sgx_status_t;
-    fn calc_sha256(
+    fn aes_gcm_128_encrypt(
+        eid: sgx_enclave_id_t,
+        status: *mut sgx_status_t,
+        key: &[u8; 16],
+        msg: *const u8,
+        msg_len: usize,
+        iv: &[u8; 12],
+        ciphertext: *mut u8,
+        mac: &mut [u8; 16],
+    ) -> sgx_status_t;
+
+    fn ecall_sha256(
         eid: sgx_enclave_id_t,
         status: *mut sgx_status_t,
         msg: *const u8,
         msg_len: usize,
         hash: *mut u8,
     ) -> sgx_status_t;
+}
+
+fn hexlify(arr: &[u8]) -> String {
+    let vec: Vec<String> = arr.iter().map(|b| format!("{:02x}", b)).collect();
+    vec.join("")
 }
 
 fn init_enclave(enclave_path: &str) -> SgxResult<SgxEnclave> {
@@ -123,9 +137,52 @@ fn init_enclave(enclave_path: &str) -> SgxResult<SgxEnclave> {
     Ok(enclave)
 }
 
-fn hexlify(arr: &[u8]) -> String {
-    let vec: Vec<String> = arr.iter().map(|b| format!("{:02x}", b)).collect();
-    vec.join("")
+fn test_aes_gcm_encrypt(enclave: &SgxEnclave) -> Result<(), String> {
+    // AES-GCM-128 test case comes from
+    // http://csrc.nist.gov/groups/ST/toolkit/BCM/documents/proposedmodes/gcm/gcm-revised-spec.pdf
+    // Test case 2
+    let msg: [u8; 16] = [0; 16];
+    let sk: [u8; 16] = [0; 16];
+    let iv: [u8; 12] = [0; 12];
+
+    let expect = "0388dace60b6a392f328c2b971b2fe78";
+
+    let mut status = sgx_status_t::SGX_SUCCESS;
+    let mut ciphertext: [u8; 16] = [0; 16];
+    let mut mac: [u8; 16] = [0; 16];
+    let result = unsafe {
+        aes_gcm_128_encrypt(
+            enclave.geteid(),
+            &mut status,
+            &sk,
+            msg.as_ptr(),
+            msg.len(),
+            &iv,
+            ciphertext.as_mut_ptr(),
+            &mut mac,
+        )
+    };
+
+    match result {
+        sgx_status_t::SGX_SUCCESS => {}
+        _ => {
+            println!("[-] ECALL Enclave Failed {}!", result.as_str());
+            return Err(result.as_str().to_string());
+        }
+    };
+
+    match status {
+        sgx_status_t::SGX_SUCCESS => {}
+        _ => {
+            println!("[-] test_aes_gcm_encrypt failed {}!", status.as_str());
+            return Err(status.as_str().to_string());
+        }
+    };
+
+    let got = hexlify(&ciphertext);
+    assert_eq!(got, expect);
+
+    Ok(())
 }
 
 fn test_sha256(enclave: &SgxEnclave) -> Result<(), String> {
@@ -144,7 +201,7 @@ fn test_sha256(enclave: &SgxEnclave) -> Result<(), String> {
         let mut status = sgx_status_t::SGX_SUCCESS;
 
         let result = unsafe {
-            calc_sha256(
+            ecall_sha256(
                 enclave.geteid(),
                 &mut status,
                 c.msg.as_ptr(),
@@ -194,6 +251,8 @@ fn main() {
             return;
         }
     };
+
+    test_aes_gcm_encrypt(&enclave).unwrap();
 
     test_sha256(&enclave).unwrap();
 

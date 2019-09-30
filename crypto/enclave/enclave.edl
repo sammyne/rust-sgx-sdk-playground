@@ -38,7 +38,7 @@ enclave {
     trusted {
         /* define ECALLs here. */
 
-        public sgx_status_t calc_sha256([in, size=len] const uint8_t* input_str,
+        public sgx_status_t ecall_sha256([in, size=len] const uint8_t* input_str,
                                         size_t len,
                                         [out] uint8_t hash[32]);
 
