@@ -83,9 +83,3 @@ add_custom_command(TARGET ${enclave} POST_BUILD
         -out ${enclaveLib} -config ${config}
     COMMENT "[SIGN] lib${enclave}.so => ${enclaveLib}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-
-## additional folder by Rust to remove
-# must use absolute path
-set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES 
-    "${CMAKE_CURRENT_SOURCE_DIR}/target"
-)
