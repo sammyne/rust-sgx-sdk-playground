@@ -29,16 +29,27 @@
 extern crate dirs;
 extern crate sgx_types;
 extern crate sgx_urts;
+
 use sgx_types::*;
 use sgx_urts::SgxEnclave;
 
 use std::io::{Read, Write};
 use std::{fs, path};
 
-//static ENCLAVE_FILE: &'static str = "enclave.signed.so";
 static ENCLAVE_TOKEN: &'static str = "enclave.token";
 
 extern "C" {
+    fn aes_gcm_128_decrypt(
+        eid: sgx_enclave_id_t,
+        status: *mut sgx_status_t,
+        key: &[u8; 16],
+        ciphertext: *const u8,
+        ciphertext_len: usize,
+        iv: &[u8; 12],
+        mac: &[u8; 16],
+        plaintext: *mut u8,
+    ) -> sgx_status_t;
+
     fn aes_gcm_128_encrypt(
         eid: sgx_enclave_id_t,
         status: *mut sgx_status_t,
@@ -137,6 +148,57 @@ fn init_enclave(enclave_path: &str) -> SgxResult<SgxEnclave> {
     Ok(enclave)
 }
 
+fn test_aes_gcm_decrypt(enclave: &SgxEnclave) -> Result<(), String> {
+    // AES-GCM-128 test case comes from
+    // http://csrc.nist.gov/groups/ST/toolkit/BCM/documents/proposedmodes/gcm/gcm-revised-spec.pdf
+    // Test case 2
+    let ciphertext = unhexlify("0388dace60b6a392f328c2b971b2fe78");
+
+    let mut mac: [u8; 16] = [0; 16];
+    mac.copy_from_slice(unhexlify("ab6e47d42cec13bdf53a67b21257bddf").as_slice());
+
+    let sk: [u8; 16] = [0; 16];
+    let iv: [u8; 12] = [0; 12];
+
+    let expect = "00000000000000000000000000000000";
+
+    let mut status = sgx_status_t::SGX_SUCCESS;
+    let mut msg: [u8; 16] = [0; 16];
+    let result = unsafe {
+        aes_gcm_128_decrypt(
+            enclave.geteid(),
+            &mut status,
+            &sk,
+            ciphertext.as_ptr(),
+            ciphertext.len(),
+            &iv,
+            &mac,
+            msg.as_mut_ptr(),
+        )
+    };
+
+    match result {
+        sgx_status_t::SGX_SUCCESS => {}
+        _ => {
+            println!("[-] ECALL Enclave Failed {}!", result.as_str());
+            return Err(result.as_str().to_string());
+        }
+    };
+
+    match status {
+        sgx_status_t::SGX_SUCCESS => {}
+        _ => {
+            println!("[-] test_aes_gcm_decrypt failed {}!", status.as_str());
+            return Err(status.as_str().to_string());
+        }
+    };
+
+    let got = hexlify(&msg);
+    assert_eq!(got, expect);
+
+    Ok(())
+}
+
 fn test_aes_gcm_encrypt(enclave: &SgxEnclave) -> Result<(), String> {
     // AES-GCM-128 test case comes from
     // http://csrc.nist.gov/groups/ST/toolkit/BCM/documents/proposedmodes/gcm/gcm-revised-spec.pdf
@@ -233,6 +295,29 @@ fn test_sha256(enclave: &SgxEnclave) -> Result<(), String> {
     Ok(())
 }
 
+fn unhexlify(s: &str) -> Vec<u8> {
+    if s.len() % 2 != 0 {
+        panic!("odd-length hex string is invalid");
+    }
+
+    let ss = s.as_bytes();
+
+    let from_hex = |x: u8| -> u8 {
+        match x {
+            y @ b'0'..=b'9' => y - b'0',
+            z @ b'a'..=b'f' => z - b'a' + 10,
+            _ => panic!("invalid hex digit"),
+        }
+    };
+
+    let mut v: Vec<u8> = Vec::with_capacity(ss.len() / 2);
+    for x in ss.chunks_exact(2) {
+        v.push((from_hex(x[0]) << 4) | from_hex(x[1]));
+    }
+
+    v
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
 
@@ -254,7 +339,12 @@ fn main() {
 
     test_aes_gcm_encrypt(&enclave).unwrap();
 
+    test_aes_gcm_decrypt(&enclave).unwrap();
+
     test_sha256(&enclave).unwrap();
+
+    //let out = unhexlify("0123456789").unwrap();
+    //println!("{:?}", out);
 
     enclave.destroy();
 }

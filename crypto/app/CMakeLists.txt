@@ -45,3 +45,8 @@ add_custom_target(${PROJECT_NAME}-dev
     DEPENDS ${app} ${enclave}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
+
+add_custom_target(${PROJECT_NAME}-check
+    cargo check
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
