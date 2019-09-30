@@ -48,7 +48,7 @@ extern "C" {
         cmac: &mut [u8; 16],
     ) -> sgx_status_t;
 
-    fn aes_gcm_128_decrypt(
+    fn ecall_aes_gcm_128_decrypt(
         eid: sgx_enclave_id_t,
         status: *mut sgx_status_t,
         key: &[u8; 16],
@@ -59,7 +59,7 @@ extern "C" {
         plaintext: *mut u8,
     ) -> sgx_status_t;
 
-    fn aes_gcm_128_encrypt(
+    fn ecall_aes_gcm_128_encrypt(
         eid: sgx_enclave_id_t,
         status: *mut sgx_status_t,
         key: &[u8; 16],
@@ -225,7 +225,7 @@ fn test_aes_gcm_decrypt(enclave: &SgxEnclave) -> Result<(), String> {
     let mut status = sgx_status_t::SGX_SUCCESS;
     let mut msg: [u8; 16] = [0; 16];
     let result = unsafe {
-        aes_gcm_128_decrypt(
+        ecall_aes_gcm_128_decrypt(
             enclave.geteid(),
             &mut status,
             &sk,
@@ -273,7 +273,7 @@ fn test_aes_gcm_encrypt(enclave: &SgxEnclave) -> Result<(), String> {
     let mut ciphertext: [u8; 16] = [0; 16];
     let mut mac: [u8; 16] = [0; 16];
     let result = unsafe {
-        aes_gcm_128_encrypt(
+        ecall_aes_gcm_128_encrypt(
             enclave.geteid(),
             &mut status,
             &sk,

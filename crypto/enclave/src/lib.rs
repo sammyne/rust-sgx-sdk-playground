@@ -153,7 +153,7 @@ pub extern "C" fn ecall_sha256(
 /// at least same length as plaintext buffer. The caller should allocate the
 /// mac buffer, at least 16 bytes.
 #[no_mangle]
-pub extern "C" fn aes_gcm_128_encrypt(
+pub extern "C" fn ecall_aes_gcm_128_encrypt(
     key: &[u8; 16],
     plaintext: *const u8,
     text_len: usize,
@@ -161,7 +161,7 @@ pub extern "C" fn aes_gcm_128_encrypt(
     ciphertext: *mut u8,
     mac: &mut [u8; 16],
 ) -> sgx_status_t {
-    println!("aes_gcm_128_encrypt invoked!");
+    println!("ecall_aes_gcm_128_encrypt invoked!");
 
     // First, we need slices for input
     let plaintext_slice = unsafe { slice::from_raw_parts(plaintext, text_len) };
@@ -185,7 +185,7 @@ pub extern "C" fn aes_gcm_128_encrypt(
 
     let ciphertext_slice = &mut ciphertext_vec[..];
     println!(
-        "aes_gcm_128_encrypt parameter prepared! {}, {}",
+        "ecall_aes_gcm_128_encrypt parameter prepared! {}, {}",
         plaintext_slice.len(),
         ciphertext_slice.len()
     );
@@ -260,7 +260,7 @@ pub extern "C" fn aes_gcm_128_encrypt(
 /// The caller should allocate the plaintext buffer. This buffer should be
 /// at least same length as ciphertext buffer.
 #[no_mangle]
-pub extern "C" fn aes_gcm_128_decrypt(
+pub extern "C" fn ecall_aes_gcm_128_decrypt(
     key: &[u8; 16],
     ciphertext: *const u8,
     text_len: usize,
@@ -268,7 +268,7 @@ pub extern "C" fn aes_gcm_128_decrypt(
     mac: &[u8; 16],
     plaintext: *mut u8,
 ) -> sgx_status_t {
-    println!("aes_gcm_128_decrypt invoked!");
+    println!("ecall_aes_gcm_128_decrypt invoked!");
 
     // First, for data with unknown length, we use vector as builder.
     let ciphertext_slice = unsafe { slice::from_raw_parts(ciphertext, text_len) };
@@ -283,7 +283,7 @@ pub extern "C" fn aes_gcm_128_decrypt(
 
     let plaintext_slice = &mut plaintext_vec[..];
     println!(
-        "aes_gcm_128_decrypt parameter prepared! {}, {}",
+        "ecall_aes_gcm_128_decrypt parameter prepared! {}, {}",
         ciphertext_slice.len(),
         plaintext_slice.len()
     );
