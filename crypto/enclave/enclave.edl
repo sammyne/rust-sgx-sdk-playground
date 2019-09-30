@@ -56,7 +56,7 @@ enclave {
                                                 [in] uint8_t mac[16],
                                                 [out, size=len] uint8_t* plaintext);
 
-        public sgx_status_t aes_cmac([in, size=len] const uint8_t* text,
+        public sgx_status_t ecall_aes_cmac([in, size=len] const uint8_t* text,
                                      size_t len,
                                      [in] uint8_t key[16],
                                      [out] uint8_t cmac[16]);

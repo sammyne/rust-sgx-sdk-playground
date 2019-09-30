@@ -39,6 +39,15 @@ use std::{fs, path};
 static ENCLAVE_TOKEN: &'static str = "enclave.token";
 
 extern "C" {
+    fn ecall_aes_cmac(
+        eid: sgx_enclave_id_t,
+        status: *mut sgx_status_t,
+        msg: *const u8,
+        msg_len: usize,
+        key: &[u8; 16],
+        cmac: &mut [u8; 16],
+    ) -> sgx_status_t;
+
     fn aes_gcm_128_decrypt(
         eid: sgx_enclave_id_t,
         status: *mut sgx_status_t,
@@ -146,6 +155,57 @@ fn init_enclave(enclave_path: &str) -> SgxResult<SgxEnclave> {
     }
 
     Ok(enclave)
+}
+
+fn test_ecall_aes_cmac(enclave: &SgxEnclave) -> Result<(), String> {
+    // AES-CMAC test case comes from
+    // https://tools.ietf.org/html/rfc4493
+    // Example 3
+
+    let key: [u8; 16] = [
+        0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f,
+        0x3c,
+    ];
+    let msg: &[u8] = &[
+        0x6b, 0xc1, 0xbe, 0xe2, 0x2e, 0x40, 0x9f, 0x96, 0xe9, 0x3d, 0x7e, 0x11, 0x73, 0x93, 0x17,
+        0x2a, 0xae, 0x2d, 0x8a, 0x57, 0x1e, 0x03, 0xac, 0x9c, 0x9e, 0xb7, 0x6f, 0xac, 0x45, 0xaf,
+        0x8e, 0x51, 0x30, 0xc8, 0x1c, 0x46, 0xa3, 0x5c, 0xe4, 0x11,
+    ];
+
+    let mut mac: [u8; 16] = [0; 16];
+    let mut status = sgx_status_t::SGX_SUCCESS;
+    let result = unsafe {
+        ecall_aes_cmac(
+            enclave.geteid(),
+            &mut status,
+            msg.as_ptr(),
+            msg.len(),
+            &key,
+            &mut mac,
+        )
+    };
+
+    match result {
+        sgx_status_t::SGX_SUCCESS => {}
+        _ => {
+            println!("[-] ECALL Enclave Failed {}!", result.as_str());
+            return Err(result.as_str().to_string());
+        }
+    };
+
+    match status {
+        sgx_status_t::SGX_SUCCESS => {}
+        _ => {
+            println!("[-] sha256 ailed {}!", status.as_str());
+            return Err(status.as_str().to_string());
+        }
+    };
+
+    let expect = "dfa66747de9ae63030ca32611497c827";
+    let got = hexlify(&mac);
+    assert_eq!(got, expect);
+
+    Ok(())
 }
 
 fn test_aes_gcm_decrypt(enclave: &SgxEnclave) -> Result<(), String> {
@@ -336,6 +396,8 @@ fn main() {
             return;
         }
     };
+
+    test_ecall_aes_cmac(&enclave).unwrap();
 
     test_aes_gcm_encrypt(&enclave).unwrap();
 

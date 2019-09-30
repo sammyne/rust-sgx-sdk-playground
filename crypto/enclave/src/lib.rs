@@ -339,7 +339,7 @@ pub extern "C" fn aes_gcm_128_decrypt(
 ///
 /// The caller should allocate the output cmac buffer.
 #[no_mangle]
-pub extern "C" fn aes_cmac(
+pub extern "C" fn ecall_aes_cmac(
     text: *const u8,
     text_len: usize,
     key: &[u8; 16],
