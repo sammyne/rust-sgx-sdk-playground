@@ -1,0 +1,17 @@
+[package]
+name = "enclave"
+version = "1.0.0"
+authors = ["Baidu"]
+
+[lib]
+name = "enclave"
+crate-type = ["staticlib"]
+
+[features]
+default = []
+
+[target.'cfg(not(target_env = "sgx"))'.dependencies]
+sgx_types = { git = "https://github.com/baidu/rust-sgx-sdk.git" }
+sgx_trts = { git = "https://github.com/baidu/rust-sgx-sdk.git" }
+sgx_tstd = { git = "https://github.com/baidu/rust-sgx-sdk.git" }
+sgx_tcrypto = { git = "https://github.com/baidu/rust-sgx-sdk.git" }

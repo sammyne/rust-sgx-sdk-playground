@@ -1,0 +1,3 @@
+[workspace]
+members = ["app","enclave"]
+defualt-members = ["app","enclave"]
