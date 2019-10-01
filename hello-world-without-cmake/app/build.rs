@@ -44,6 +44,8 @@ impl SGX {
     ///     - SGX_SDK: path of intel SGX sdk
     ///     - SGX_MODE: mode of the built app
     ///     - RUST_SGX_SDK: path of rust-sgx-sdk
+    /// @dev since SGX_MODE is used by some unknown process, the replacement by the 'PROFILE'
+    ///     option of 'cargo build' still failed
     fn from_env() -> Result<Self, String> {
         let c_sdk_path = env::var("SGX_SDK").unwrap_or_else(|_| "/opt/sgxsdk".to_string());
 
