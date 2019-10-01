@@ -8,7 +8,6 @@ add_custom_target(${app} ALL
     COMMAND SGX_SDK=${sgxPath} SGX_MODE=${SGX_MODE} 
         cargo build --release --target-dir=${CMAKE_CURRENT_BINARY_DIR}/cargo
     COMMENT "[CARGO] app => ${appBin}"
-    DEPENDS ${uBridgeLib}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
