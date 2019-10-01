@@ -4,7 +4,7 @@ struct SGX {
     sdk_dir: String,
     lib_dir: String,
     edger8r: String,
-    mode: String,
+    is_sim: bool,
 
     rts_lib: String,
 
@@ -12,17 +12,16 @@ struct SGX {
 }
 
 impl SGX {
-    fn new(c_sdk_path: &str, mode: &str, rust_sdk_path: &str) -> Result<Self, String> {
+    fn new(c_sdk_path: &str, is_sim: bool, rust_sdk_path: &str) -> Result<Self, String> {
         // @TODO check existence of directory and files
 
         let sdk_dir = c_sdk_path.to_string();
         let lib_dir = format!("{}/lib64", &sdk_dir);
         let edger8r = format!("{}/bin/x64/sgx_edger8r", &sdk_dir);
-        let mode = mode.to_string();
 
         let rts_lib = {
-            let suffix = match mode.as_ref() {
-                "HW" => "",
+            let suffix = match is_sim {
+                true => "",
                 _ => "_sim",
             };
 
@@ -33,12 +32,29 @@ impl SGX {
             sdk_dir,
             lib_dir,
             edger8r,
-            mode,
+            is_sim,
 
             rts_lib,
 
             rust_sdk_path: rust_sdk_path.to_string(),
         })
+    }
+
+    /// @dev 3 env variables are read by this method
+    ///     - SGX_SDK: path of intel SGX sdk
+    ///     - SGX_MODE: mode of the built app
+    ///     - RUST_SGX_SDK: path of rust-sgx-sdk
+    fn from_env() -> Result<Self, String> {
+        let c_sdk_path = env::var("SGX_SDK").unwrap_or_else(|_| "/opt/sgxsdk".to_string());
+
+        let is_sim = env::var("SGX_MODE").unwrap_or_else(|_| "SW".to_string()) != "HW";
+
+        let rust_sdk_path = env::var("RUST_SGX_SDK").unwrap_or_else(|_| {
+            let dir = fs::canonicalize("../../vendor/rust-sgx-sdk").unwrap();
+            dir.to_str().unwrap().to_string()
+        });
+
+        Self::new(&c_sdk_path, is_sim, &rust_sdk_path)
     }
 }
 
@@ -46,8 +62,8 @@ fn build_bridge_lib(sgx: &SGX, out_dir: &str) -> String {
     let lib_name = "enclave_u";
     let src = format!("{}/{}.c", out_dir, lib_name);
 
-    let mut flags = match sgx.mode.as_str() {
-        "HW" => "-g -O2".to_string(),
+    let mut flags = match sgx.is_sim {
+        true => "-g -O2".to_string(),
         _ => "-m64 -O0 -g".to_string(),
     };
     flags += " -fPIC -Wno-attributes";
@@ -93,17 +109,7 @@ fn generate_bridge(sgx: &SGX, untrusted_dir: &str) {
 fn main() {
     let out_dir = env::var("OUT_DIR").expect("missing OUT_DIR");
 
-    let sdk_dir = env::var("SGX_SDK").unwrap_or_else(|_| "/opt/sgxsdk".to_string());
-
-    let is_sim = env::var("SGX_MODE").unwrap_or_else(|_| "SW".to_string());
-
-    // @TODO: load this from env
-    let rust_sdk_path = env::var("RUST_SGX_SDK").unwrap_or_else(|_| {
-        let dir = fs::canonicalize("../../vendor/rust-sgx-sdk").unwrap();
-        dir.to_str().unwrap().to_string()
-    });
-
-    let sgx = SGX::new(&sdk_dir, &is_sim, &rust_sdk_path).unwrap();
+    let sgx = SGX::from_env().expect("failed to load config for SGX from env");
 
     generate_bridge(&sgx, &out_dir);
 
