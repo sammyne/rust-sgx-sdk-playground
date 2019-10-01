@@ -48,17 +48,18 @@ fn build_bridge_lib(sgx: &SGX, untrusted_dir: &str) -> (String, String) {
     let src = format!("{}/{}.c", untrusted_dir, lib_name);
 
     let mut flags = match sgx.mode.as_str() {
-        "HW" => vec!["-g", "-O2"],
-        _ => vec!["-m64", "-O0", "-g"],
+        "HW" => "-g -O2".to_string(),
+        _ => "-m64 -O0 -g".to_string(),
     };
-    flags.append(&mut vec!["-fPIC", "-Wno-attributes"]);
+    flags += " -fPIC -Wno-attributes";
 
     // default is a static library
     let mut build = cc::Build::new();
 
     build.file(src);
 
-    for flag in flags {
+    //let flags = flags.split_whitespace();
+    for flag in flags.split_whitespace() {
         build.flag(flag);
     }
 
