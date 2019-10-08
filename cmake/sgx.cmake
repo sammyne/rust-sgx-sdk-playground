@@ -23,3 +23,5 @@ set(sgxSigner ${sgxPath}/bin/x64/sgx_sign)
 
 # rust-sgx-sdk
 set(rustSGXPath ${PROJECT_SOURCE_DIR}/vendor/rust-sgx-sdk)
+
+message(STATUS "SGX_MODE=${SGX_MODE}")

@@ -33,13 +33,15 @@ fn main () {
     let sdk_dir = env::var("SGX_SDK")
                     .unwrap_or_else(|_| "/opt/intel/sgxsdk".to_string());
     let is_sim = env::var("SGX_MODE")
-                    .unwrap_or_else(|_| "HW".to_string());
+                    .unwrap_or_else(|_| "SW".to_string());
 
     let bridge_dir = env::var("BRIDGE_LIB_PATH")
                     .unwrap_or_else(|_| ".".to_string());
+    let bridge_lib = env::var("BRIDGE_LIB_NAME")
+                    .unwrap_or_else(|_| "enclave_u".to_string());
 
     println!("cargo:rustc-link-search=native={}", bridge_dir);
-    println!("cargo:rustc-link-lib=static=enclave_u");
+    println!("cargo:rustc-link-lib=static={}", bridge_lib);
 
     println!("cargo:rustc-link-search=native={}/lib64", sdk_dir);
     match is_sim.as_ref() {

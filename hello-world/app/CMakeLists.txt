@@ -34,7 +34,8 @@ set(appBin ${CMAKE_CURRENT_BINARY_DIR}/cargo/release/app)
 # directory
 add_custom_target(${app} ALL
     COMMAND SGX_SDK=${sgxPath} SGX_MODE=${SGX_MODE} BRIDGE_LIB_PATH=${uBridgeLibPath} 
-        cargo build --release --target-dir=${CMAKE_CURRENT_BINARY_DIR}/cargo
+        BRIDGE_LIB_NAME=${uBridgeLib} cargo build --release 
+        --target-dir=${CMAKE_CURRENT_BINARY_DIR}/cargo
     COMMENT "[CARGO] app => ${appBin}"
     DEPENDS ${uBridgeLib}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
