@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(https-client-cmake)
+project(https-client)
 
 #set(appPath ${CMAKE_CURRENT_SOURCE_DIR}/app)
 set(enclavePath ${CMAKE_CURRENT_SOURCE_DIR}/enclave)
@@ -15,4 +15,4 @@ set(enclaveLib ${PROJECT_NAME}-enclave.signed.so)
 set(key ${enclavePath}/isv.pem)
 
 add_subdirectory(enclave)
-#add_subdirectory(app)
+add_subdirectory(app)

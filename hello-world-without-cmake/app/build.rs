@@ -21,8 +21,8 @@ impl SGX {
 
         let rts_lib = {
             let suffix = match is_sim {
-                true => "",
-                _ => "_sim",
+                true => "_sim",
+                _ => "",
             };
 
             format!("sgx_urts{}", suffix)

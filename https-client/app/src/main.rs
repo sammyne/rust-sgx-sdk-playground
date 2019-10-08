@@ -154,8 +154,6 @@ fn main() {
         }
     };
 
-    let mut retval = sgx_status_t::SGX_SUCCESS;
-
     let hostname = "www.baidu.com";
     let port = 443;
     let socket_addr = lookup_ipv4(hostname, port);
@@ -167,11 +165,11 @@ fn main() {
     let mut retval = sgx_status_t::SGX_SUCCESS;
 
     let result = unsafe {
-        say_something(
+        send_http_request(
             enclave.geteid(),
             &mut retval,
-            input_string.as_ptr() as *const u8,
-            input_string.len(),
+            socket.as_raw_fd(),
+            c_hostname.as_ptr() as *const c_char,
         )
     };
 
@@ -183,7 +181,7 @@ fn main() {
         }
     }
 
-    println!("[+] say_something success...");
+    println!("[+] send_http_request success...");
 
     enclave.destroy();
 }
