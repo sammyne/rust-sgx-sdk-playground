@@ -44,3 +44,9 @@ make hello-world-dev
     rustup install nightly-2019-08-01
     rustup default nightly-2019-08-01
     ```
+- For errors of pattern as follow, it's because dependencies bring `std` into the `no_std` environment. As for how to address this, check https://github.com/baidu/rust-sgx-sdk/issues/31
+    ```bash
+    error: duplicate lang item in crate `sgx_tstd`: `f32_runtime`.
+    |
+    = note: first defined in crate `std`.
+    ```
