@@ -11,9 +11,9 @@ crate-type = ["staticlib"]
 default = []
 
 [target.'cfg(not(target_env = "sgx"))'.dependencies]
-sgx_types = { git = "https://github.com/baidu/rust-sgx-sdk.git" }
-sgx_tstd = { git = "https://github.com/baidu/rust-sgx-sdk.git" }
-sgx_tprotected_fs = { git = "https://github.com/baidu/rust-sgx-sdk.git" }
+sgx_types = { rev="v1.0.9", git = "https://github.com/baidu/rust-sgx-sdk.git" }
+sgx_tstd = { rev="v1.0.9", git = "https://github.com/baidu/rust-sgx-sdk.git" }
+sgx_tprotected_fs = { rev="v1.0.9", git = "https://github.com/baidu/rust-sgx-sdk.git" }
 
 # [patch.'https://github.com/baidu/rust-sgx-sdk.git']
 # sgx_alloc = { path = "../../../sgx_alloc" }
