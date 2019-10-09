@@ -1,0 +1,22 @@
+[package]
+name = "enclave"
+version = "1.0.0"
+authors = ["Baidu"]
+edition = "2018"
+
+[lib]
+name = "enclave"
+crate-type = ["staticlib"]
+
+[features]
+default = []
+
+[dependencies]
+rustls = { git = "https://github.com/mesalock-linux/rustls", branch = "mesalock_sgx" }
+webpki = { git = "https://github.com/mesalock-linux/webpki", branch = "mesalock_sgx" }
+
+[target.'cfg(not(target_env = "sgx"))'.dependencies]
+sgx_types = { rev="v1.0.9", git = "https://github.com/baidu/rust-sgx-sdk.git" }
+sgx_trts = { rev="v1.0.9", git = "https://github.com/baidu/rust-sgx-sdk.git" }
+sgx_tstd = { rev="v1.0.9", git = "https://github.com/baidu/rust-sgx-sdk.git", features=["net"] }
+

@@ -1,0 +1,19 @@
+[package]
+name = "app"
+version = "1.0.0"
+authors = ["Baidu"]
+build = "build.rs"
+
+[dependencies]
+sgx_types = { git = "https://github.com/baidu/rust-sgx-sdk.git" }
+sgx_urts = { git = "https://github.com/baidu/rust-sgx-sdk.git" }
+dirs = "1.0.2"
+mio = "0.6"
+
+# [patch.'https://github.com/baidu/rust-sgx-sdk.git']
+# sgx_types = { path = "../../../sgx_types" }
+# sgx_urts = { path = "../../../sgx_urts" }
+
+
+[build-dependencies]
+cc = "1.0.45"

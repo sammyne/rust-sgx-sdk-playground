@@ -26,7 +26,7 @@ container for you, with a simple command
 # as many as you want
 mkdir build 
 cd build
-# default is SIM mode
+# default is SIM mode. For hardware mode, use 'cmake -DCMAKE_BUILD_TYPE=Release ..'
 cmake ..
 make -j
 ```
@@ -37,6 +37,12 @@ make -j
 # the hello-world example
 make hello-world-dev
 ```
+
+## Examples
+
+|    Project | Description                          |
+| ---------: | :----------------------------------- |
+| tls-server | a TLS server running within enclaves |
 
 ## FYI
 - In the hardware mode, please employ the specific rust toolchain tagged by `nightly-2019-08-01`
