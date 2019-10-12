@@ -12,8 +12,8 @@ add_custom_target(${app} ALL
 )
 
 add_custom_target(${PROJECT_NAME}-dev
-    ${appBin} ${PROJECT_BINARY_DIR}/enclave/${enclaveLib} ${PROJECT_SOURCE_DIR}/pki/end.fullchain 
-        ${PROJECT_SOURCE_DIR}/pki/end.rsa
+    ${appBin} ${PROJECT_BINARY_DIR}/enclave/${enclaveLib} ${PROJECT_SOURCE_DIR}/pki/ca.cert
+        ${PROJECT_SOURCE_DIR}/pki/server.key
     DEPENDS ${app} ${enclave}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )

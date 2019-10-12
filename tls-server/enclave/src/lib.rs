@@ -43,41 +43,38 @@ impl TlsServer {
     }
 }
 
-fn load_certs(filename: &str) -> Vec<rustls::Certificate> {
-    let certfile = fs::File::open(filename).expect("cannot open certificate file");
-    let mut reader = BufReader::new(certfile);
+fn parse_certs(certs: &[u8]) -> Vec<rustls::Certificate> {
+    let mut reader = BufReader::new(certs);
     rustls::internal::pemfile::certs(&mut reader).unwrap()
 }
 
-fn load_private_key(filename: &str) -> rustls::PrivateKey {
-    let rsa_keys = {
-        let keyfile = fs::File::open(filename).expect("cannot open private key file");
-        let mut reader = BufReader::new(keyfile);
-        rustls::internal::pemfile::rsa_private_keys(&mut reader)
-            .expect("file contains invalid rsa private key")
-    };
-
+fn parse_private_key(key_pem: &[u8]) -> rustls::PrivateKey {
     let pkcs8_keys = {
-        let keyfile = fs::File::open(filename).expect("cannot open private key file");
-        let mut reader = BufReader::new(keyfile);
+        let mut reader = BufReader::new(key_pem);
         rustls::internal::pemfile::pkcs8_private_keys(&mut reader)
             .expect("file contains invalid pkcs8 private key (encrypted keys not supported)")
     };
 
     // prefer to load pkcs8 keys
     if !pkcs8_keys.is_empty() {
-        pkcs8_keys[0].clone()
-    } else {
-        assert!(!rsa_keys.is_empty());
-        rsa_keys[0].clone()
+        return pkcs8_keys[0].clone();
     }
+
+    let rsa_keys = {
+        let mut reader = BufReader::new(key_pem);
+        rustls::internal::pemfile::rsa_private_keys(&mut reader)
+            .expect("file contains invalid rsa private key")
+    };
+
+    assert!(!rsa_keys.is_empty());
+    rsa_keys[0].clone()
 }
 
-fn make_config(cert: &str, key: &str) -> Arc<rustls::ServerConfig> {
+fn make_config(cert: &[u8], key: &[u8]) -> Arc<rustls::ServerConfig> {
     let mut config = rustls::ServerConfig::new(NoClientAuth::new());
 
-    let certs = load_certs(cert);
-    let privkey = load_private_key(key);
+    let certs = parse_certs(cert);
+    let privkey = parse_private_key(key);
     config
         .set_single_cert_with_ocsp_and_sct(certs, privkey, vec![], vec![])
         .unwrap();
@@ -105,15 +102,10 @@ pub extern "C" fn tls_server_new(
     cert: *const c_char,
     key: *const c_char,
 ) -> *const c_void {
-    let certfile = unsafe { CStr::from_ptr(cert).to_str() };
-    if certfile.is_err() {
-        return ptr::null();
-    }
-    let keyfile = unsafe { CStr::from_ptr(key).to_str() };
-    if keyfile.is_err() {
-        return ptr::null();
-    }
-    let config = make_config(certfile.unwrap(), keyfile.unwrap());
+    let CA = unsafe{ CStr::from_ptr(cert).to_bytes_with_nul() };
+    let raw_key = unsafe{ CStr::from_ptr(key).to_bytes_with_nul() };
+
+    let config = make_config(CA, raw_key);
 
     Box::into_raw(Box::new(TlsServer::new(fd, config))) as *const c_void
 }

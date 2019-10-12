@@ -25,7 +25,7 @@ func loadRootCA(path string) (*x509.CertPool, error) {
 }
 
 func main() {
-	rootCAs, err := loadRootCA("../pki/end.fullchain")
+	rootCAs, err := loadRootCA("../pki/ca.cert")
 	if err != nil {
 		panic(err)
 	}

@@ -150,10 +150,17 @@ fn main() {
     let addr: net::SocketAddr = "0.0.0.0:4433".parse().unwrap();
     let listener = net::TcpListener::bind(&addr).expect("cannot listen on port");
 
-    let cert_path = CString::new(args[2].as_bytes()).unwrap();
-    let key_path = CString::new(args[3].as_bytes()).unwrap();
+    let certs = {
+        let c = fs::read_to_string(&args[2]).unwrap();
+        CString::new(c.as_bytes()).unwrap()
+    };
+    let key = {
+        let k = fs::read_to_string(&args[3]).unwrap();
+        CString::new(k.as_bytes()).unwrap()
+    };
 
     for stream in listener.incoming().take(1) {
+        println!("new incoming session ...");
         let stream = stream.unwrap();
 
         let mut session: *const c_void = ptr::null();
@@ -163,8 +170,8 @@ fn main() {
                 enclave.geteid(),
                 &mut session as *mut *const c_void,
                 stream.as_raw_fd(),
-                cert_path.as_bytes_with_nul().as_ptr() as *const c_char,
-                key_path.as_bytes_with_nul().as_ptr() as *const c_char,
+                certs.as_bytes_with_nul().as_ptr() as *const c_char,
+                key.as_bytes_with_nul().as_ptr() as *const c_char,
             )
         };
 
@@ -201,7 +208,6 @@ fn main() {
 
         match status {
             sgx_status_t::SGX_SUCCESS => {
-                println!("buf_len = {}", buf_len);
                 buf.resize(buf_len as usize, 0);
                 if buf.is_empty() {
                     println!("empty incoming message");
@@ -242,10 +248,6 @@ fn main() {
                 return;
             }
         };
-
-        //unsafe {
-        //    tls_server_close(enclave.geteid(), session);
-        //}
     }
 
     println!("done");
