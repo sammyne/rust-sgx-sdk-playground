@@ -35,7 +35,7 @@ make -j
 
 ```bash
 # the hello-world example
-make hello-world-dev
+make run-hello-world
 ```
 
 ## Examples

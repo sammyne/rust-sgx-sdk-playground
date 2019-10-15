@@ -41,7 +41,7 @@ add_custom_target(${app} ALL
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_custom_target(${PROJECT_NAME}-dev
+add_custom_target(run-${PROJECT_NAME}
     ${appBin} ${CMAKE_CURRENT_BINARY_DIR}/../enclave/${enclaveLib}
     DEPENDS ${app} ${enclave}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
