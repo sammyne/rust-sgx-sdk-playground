@@ -512,8 +512,8 @@ pub extern "C" fn ecall_secp256k1_verify(
     let pub_key = secp256k1::PublicKey::parse_compressed(&pub_key).unwrap();
     let msg = secp256k1::Message::parse_slice(&hash[..]).unwrap();
     let sig = {
-        const sig_len: usize = secp256k1::util::SIGNATURE_SIZE;
-        secp256k1::Signature::parse_slice(&sig[..sig_len]).unwrap()
+        const SIG_LEN: usize = secp256k1::util::SIGNATURE_SIZE;
+        secp256k1::Signature::parse_slice(&sig[..SIG_LEN]).unwrap()
     };
 
     if !secp256k1::verify(&msg, &sig, &pub_key) {
