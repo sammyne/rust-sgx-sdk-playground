@@ -11,7 +11,14 @@ crate-type = ["staticlib"]
 default = []
 
 [target.'cfg(not(target_env = "sgx"))'.dependencies]
-sgx_types = { git = "https://github.com/baidu/rust-sgx-sdk.git" }
-sgx_trts = { git = "https://github.com/baidu/rust-sgx-sdk.git" }
-sgx_tstd = { git = "https://github.com/baidu/rust-sgx-sdk.git" }
-sgx_tcrypto = { git = "https://github.com/baidu/rust-sgx-sdk.git" }
+sgx_types = { rev="v1.0.9", git = "https://github.com/baidu/rust-sgx-sdk.git" }
+sgx_trts = { rev="v1.0.9", git = "https://github.com/baidu/rust-sgx-sdk.git" }
+sgx_tstd = { rev="v1.0.9", git = "https://github.com/baidu/rust-sgx-sdk.git" }
+sgx_tcrypto = { rev="v1.0.9", git = "https://github.com/baidu/rust-sgx-sdk.git" }
+sgx_rand = { rev="v1.0.9", git = "https://github.com/baidu/rust-sgx-sdk.git" }
+
+[dependencies.libsecp256k1]
+rev = "da6579b340ac85f9bb7280513b017599b0b38dd1"
+git = "https://github.com/sammyne/libsecp256k1.git"
+default-features = false
+features = ["sgx"]

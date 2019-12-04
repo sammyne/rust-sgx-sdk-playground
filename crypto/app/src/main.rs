@@ -77,6 +77,39 @@ extern "C" {
         msg_len: usize,
         hash: *mut u8,
     ) -> sgx_status_t;
+
+    fn ecall_secp256k1_generate_key(
+        eid: sgx_enclave_id_t,
+        status: *mut sgx_status_t,
+        priv_key: &mut [u8; 32],
+        pub_key: &mut [u8; 33],
+    ) -> sgx_status_t;
+
+    fn ecall_secp256k1_sign(
+        eid: sgx_enclave_id_t,
+        status: *mut sgx_status_t,
+        priv_key: &[u8; 32],
+        hash: &[u8; 32],
+        sig_out: &mut [u8; 65],
+    ) -> sgx_status_t;
+
+    fn ecall_secp256k1_verify(
+        eid: sgx_enclave_id_t,
+        status: *mut sgx_status_t,
+        pub_key: &[u8; 33],
+        hash: &[u8; 32],
+        sig: &[u8; 65],
+    ) -> sgx_status_t;
+}
+
+fn must_ok(status: &sgx_status_t, err_msg: &str) -> Result<(), String> {
+    match status {
+        sgx_status_t::SGX_SUCCESS => Ok(()),
+        _ => {
+            println!("[-] {} {}!", err_msg, status.as_str());
+            Err(status.as_str().to_string())
+        }
+    }
 }
 
 fn hexlify(arr: &[u8]) -> String {
@@ -355,6 +388,45 @@ fn test_sha256(enclave: &SgxEnclave) -> Result<(), String> {
     Ok(())
 }
 
+fn test_secp256k1(enclave: &SgxEnclave) -> Result<(), String> {
+    println!("testing secp256k1...");
+
+    let mut priv_key = [0u8; 32];
+    let mut pub_key = [0u8; 33];
+
+    let mut status = sgx_status_t::SGX_SUCCESS;
+    let result = unsafe {
+        ecall_secp256k1_generate_key(enclave.geteid(), &mut status, &mut priv_key, &mut pub_key)
+    };
+
+    must_ok(&result, "ECALL enclave failed")?;
+    must_ok(&status, "ecall_secp256k1_generate_key failed")?;
+
+    //println!("private key: {:?}", &priv_key[..]);
+    //println!("public key: {:?}", &pub_key[..]);
+
+    let msg = [123u8; 32];
+    let mut sig = [0u8; 65];
+
+    let mut status = sgx_status_t::SGX_SUCCESS;
+    let result =
+        unsafe { ecall_secp256k1_sign(enclave.geteid(), &mut status, &priv_key, &msg, &mut sig) };
+    must_ok(&result, "ECALL enclave failed")?;
+    must_ok(&status, "ecall_secp256k1_sign failed")?;
+
+    //println!("sig: {:?}", &sig[..]);
+
+    let mut status = sgx_status_t::SGX_SUCCESS;
+    let result =
+        unsafe { ecall_secp256k1_verify(enclave.geteid(), &mut status, &pub_key, &msg, &sig) };
+    must_ok(&result, "ECALL enclave failed")?;
+    must_ok(&status, "ecall_secp256k1_verify failed")?;
+
+    println!("done testing secp256k1...");
+
+    Ok(())
+}
+
 fn unhexlify(s: &str) -> Vec<u8> {
     if s.len() % 2 != 0 {
         panic!("odd-length hex string is invalid");
@@ -405,8 +477,7 @@ fn main() {
 
     test_sha256(&enclave).unwrap();
 
-    //let out = unhexlify("0123456789").unwrap();
-    //println!("{:?}", out);
+    test_secp256k1(&enclave).unwrap();
 
     enclave.destroy();
 }

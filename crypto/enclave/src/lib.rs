@@ -32,6 +32,7 @@
 #![cfg_attr(not(target_env = "sgx"), no_std)]
 #![cfg_attr(target_env = "sgx", feature(rustc_private))]
 
+extern crate sgx_rand;
 extern crate sgx_tcrypto;
 extern crate sgx_trts;
 extern crate sgx_types;
@@ -39,12 +40,17 @@ extern crate sgx_types;
 #[macro_use]
 extern crate sgx_tstd as std;
 
+//extern crate secp256k1;
+
+use sgx_rand::{Rng, StdRng};
 use sgx_tcrypto::*;
 use sgx_trts::memeq::ConsttimeMemEq;
 use sgx_types::*;
 use std::ptr;
 use std::slice;
 use std::vec::Vec;
+
+//use secp256k1;
 
 /// A Ecall function takes a string and output its SHA256 digest.
 ///
@@ -454,6 +460,64 @@ pub extern "C" fn rsa_key(text: *const u8, text_len: usize) -> sgx_status_t {
 
     if plaintext[..plaintext_len].consttime_memeq(text_slice) == false {
         return sgx_status_t::SGX_ERROR_UNEXPECTED;
+    }
+
+    sgx_status_t::SGX_SUCCESS
+}
+
+#[no_mangle]
+pub extern "C" fn ecall_secp256k1_generate_key(
+    priv_key_out: &mut [u8; 32],
+    pub_key_out: &mut [u8; 33],
+) -> sgx_status_t {
+    let mut rand = StdRng::new().unwrap();
+
+    let mut seed = [0u8; 32];
+    rand.fill_bytes(&mut seed);
+
+    let priv_key = secp256k1::SecretKey::parse(&seed).unwrap();
+    *priv_key_out = priv_key.serialize();
+
+    let pub_key = secp256k1::PublicKey::from_secret_key(&priv_key);
+    *pub_key_out = pub_key.serialize_compressed();
+
+    sgx_status_t::SGX_SUCCESS
+}
+
+#[no_mangle]
+pub extern "C" fn ecall_secp256k1_sign(
+    priv_key: &[u8; 32],
+    hash: &[u8; 32],
+    sig_out: &mut [u8; 65],
+) -> sgx_status_t {
+    let priv_key = secp256k1::SecretKey::parse(priv_key).unwrap();
+
+    let msg = secp256k1::Message::parse_slice(&hash[..]).unwrap();
+
+    let (sig, recovery_id) = secp256k1::sign(&msg, &priv_key);
+    let sig = sig.serialize();
+
+    sig_out[..64].copy_from_slice(&sig[..]);
+    sig_out[64] = recovery_id.serialize();
+
+    sgx_status_t::SGX_SUCCESS
+}
+
+#[no_mangle]
+pub extern "C" fn ecall_secp256k1_verify(
+    pub_key: &[u8; 33],
+    hash: &[u8; 32],
+    sig: &[u8; 65],
+) -> sgx_status_t {
+    let pub_key = secp256k1::PublicKey::parse_compressed(&pub_key).unwrap();
+    let msg = secp256k1::Message::parse_slice(&hash[..]).unwrap();
+    let sig = {
+        const sig_len: usize = secp256k1::util::SIGNATURE_SIZE;
+        secp256k1::Signature::parse_slice(&sig[..sig_len]).unwrap()
+    };
+
+    if !secp256k1::verify(&msg, &sig, &pub_key) {
+        return sgx_status_t::SGX_ERROR_INVALID_PARAMETER;
     }
 
     sgx_status_t::SGX_SUCCESS

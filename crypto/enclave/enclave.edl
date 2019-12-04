@@ -63,6 +63,20 @@ enclave {
 
         public sgx_status_t rsa_key([in, size=len] const uint8_t* text, size_t len);
 
+        public sgx_status_t ecall_secp256k1_generate_key(
+            [out] uint8_t priv_key[32],
+            [out] uint8_t pub_key[33]);
+
+        public sgx_status_t ecall_secp256k1_sign(
+            [in] uint8_t priv_key[32],
+            [in] uint8_t hash[32],
+            [out] uint8_t sig[65]);
+        
+        public sgx_status_t ecall_secp256k1_verify(
+            [in] uint8_t pub_key[33],
+            [in] uint8_t hash[32],
+            [in] uint8_t sig[65]);
+
     };
 
     untrusted { };
