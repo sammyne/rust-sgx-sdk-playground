@@ -5,11 +5,11 @@ authors = ["Baidu"]
 build = "build.rs"
 
 [dependencies]
-sgx_types = { git = "https://github.com/baidu/rust-sgx-sdk.git" }
-sgx_urts = { git = "https://github.com/baidu/rust-sgx-sdk.git" }
+sgx_types = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk.git", tag = "v1.0.9" }
+sgx_urts = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk.git", tag = "v1.0.9" }
 dirs = "1.0.2"
 
-# [patch.'https://github.com/baidu/rust-sgx-sdk.git']
+# [patch.'https://github.com/apache/incubator-teaclave-sgx-sdk.git']
 # sgx_types = { path = "../../../sgx_types" }
 # sgx_urts = { path = "../../../sgx_urts" }
 
