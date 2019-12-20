@@ -1,7 +1,7 @@
 [package]
 name = "enclave"
 version = "1.0.0"
-authors = ["sammyne"]
+authors = ["sammyne <lixiangmin01@baidu.com>"]
 
 [lib]
 name = "enclave"
@@ -10,6 +10,6 @@ crate-type = ["staticlib"]
 [features]
 default = []
 
-[target.'cfg(not(target_env = "sgx"))'.dependencies]
+[dependencies]
 sgx_types = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk.git", tag = "v1.0.9" }
 sgx_tstd = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk.git", tag = "v1.0.9" }
