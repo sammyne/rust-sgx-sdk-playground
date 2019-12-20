@@ -5,8 +5,8 @@ name = "app"
 version = "1.0.0"
 dependencies = [
  "dirs 1.0.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "sgx_types 1.0.9 (git+https://github.com/baidu/rust-sgx-sdk.git?rev=v1.0.9)",
- "sgx_urts 1.0.9 (git+https://github.com/baidu/rust-sgx-sdk.git?rev=v1.0.9)",
+ "sgx_types 1.1.0 (git+https://github.com/apache/incubator-teaclave-sgx-sdk.git?tag=v1.1.0)",
+ "sgx_urts 1.1.0 (git+https://github.com/apache/incubator-teaclave-sgx-sdk.git?tag=v1.1.0)",
 ]
 
 [[package]]
@@ -235,16 +235,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "sgx_types"
-version = "1.0.9"
-source = "git+https://github.com/baidu/rust-sgx-sdk.git?rev=v1.0.9#bcb3c7a1a10c7222839ee19b0720115ac8a1103e"
+version = "1.1.0"
+source = "git+https://github.com/apache/incubator-teaclave-sgx-sdk.git?tag=v1.1.0#4508450be2c6e169bc592b9d8c6ab3802eb2d557"
 
 [[package]]
 name = "sgx_urts"
-version = "1.0.9"
-source = "git+https://github.com/baidu/rust-sgx-sdk.git?rev=v1.0.9#bcb3c7a1a10c7222839ee19b0720115ac8a1103e"
+version = "1.1.0"
+source = "git+https://github.com/apache/incubator-teaclave-sgx-sdk.git?tag=v1.1.0#4508450be2c6e169bc592b9d8c6ab3802eb2d557"
 dependencies = [
  "libc 0.2.62 (registry+https://github.com/rust-lang/crates.io-index)",
- "sgx_types 1.0.9 (git+https://github.com/baidu/rust-sgx-sdk.git?rev=v1.0.9)",
+ "sgx_types 1.1.0 (git+https://github.com/apache/incubator-teaclave-sgx-sdk.git?tag=v1.1.0)",
 ]
 
 [[package]]
@@ -323,8 +323,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum redox_users 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)" = "4ecedbca3bf205f8d8f5c2b44d83cd0690e39ee84b951ed649e9f1841132b66d"
 "checksum rust-argon2 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)" = "4ca4eaef519b494d1f2848fc602d18816fed808a981aedf4f1f00ceb7c9d32cf"
 "checksum rustc-demangle 0.1.16 (registry+https://github.com/rust-lang/crates.io-index)" = "4c691c0e608126e00913e33f0ccf3727d5fc84573623b8d65b2df340b5201783"
-"checksum sgx_types 1.0.9 (git+https://github.com/baidu/rust-sgx-sdk.git?rev=v1.0.9)" = "<none>"
-"checksum sgx_urts 1.0.9 (git+https://github.com/baidu/rust-sgx-sdk.git?rev=v1.0.9)" = "<none>"
+"checksum sgx_types 1.1.0 (git+https://github.com/apache/incubator-teaclave-sgx-sdk.git?tag=v1.1.0)" = "<none>"
+"checksum sgx_urts 1.1.0 (git+https://github.com/apache/incubator-teaclave-sgx-sdk.git?tag=v1.1.0)" = "<none>"
 "checksum syn 0.15.44 (registry+https://github.com/rust-lang/crates.io-index)" = "9ca4b3b69a77cbe1ffc9e198781b7acb0c7365a883670e8f1c1bc66fba79a5c5"
 "checksum synstructure 0.10.2 (registry+https://github.com/rust-lang/crates.io-index)" = "02353edf96d6e4dc81aea2d8490a7e9db177bf8acb0e951c24940bf866cb313f"
 "checksum unicode-xid 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "fc72304796d0818e357ead4e000d19c9c174ab23dc11093ac919054d20a6a7fc"

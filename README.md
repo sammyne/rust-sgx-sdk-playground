@@ -45,6 +45,7 @@ make run-hello-world
 |                   Project | Description                                                |
 | ------------------------: | :--------------------------------------------------------- |
 |                    crypto | cryptographic primitives                                   |
+|               hello-world | hello-world example                                        |
 | hello-world-without-cmake | hello-world example with app built with cargo build script |
 |                tls-server | a TLS server running within enclaves                       |
 
