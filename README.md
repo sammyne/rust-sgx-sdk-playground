@@ -14,7 +14,7 @@ container for you, with a simple command
 
 ## Preparation
 
-1. Pull in the official [rust-sgx-sdk](https://github.com/baidu/rust-sgx-sdk) submodule
+1. Pull in the official [incubator-teaclave-sgx-sdk](https://github.com/incubator-teaclave-sgx-sdk.git) submodule
     ```bash
     git submodule update --init 
     ```
@@ -40,9 +40,12 @@ make run-hello-world
 
 ## Examples
 
-|    Project | Description                          |
-| ---------: | :----------------------------------- |
-| tls-server | a TLS server running within enclaves |
+> The mitigration towards incubator-teaclave-sgx-sdk@v1.1.0 is WIP
+
+|                   Project | Description                                                |
+| ------------------------: | :--------------------------------------------------------- |
+| hello-world-without-cmake | hello-world example with app built with cargo build script |
+|                tls-server | a TLS server running within enclaves                       |
 
 ## FYI
 - In the hardware mode, please employ the specific rust toolchain tagged by `nightly-2019-08-01`
