@@ -10,7 +10,7 @@ crate-type = ["staticlib"]
 [features]
 default = []
 
-[target.'cfg(not(target_env = "sgx"))'.dependencies]
+[dependencies]
 sgx_types = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk.git", tag = "v1.1.0" }
 sgx_trts = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk.git", tag = "v1.1.0" }
 sgx_tstd = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk.git", tag = "v1.1.0" }
@@ -22,7 +22,3 @@ branch = "rsgx-v1.1.0"
 default-features = false
 features = ["sgx"]
 git = "https://github.com/sammyne/libsecp256k1.git"
-
-[patch."https://github.com/baidu/rust-sgx-sdk"]
-sgx_tstd = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk.git", tag = "v1.1.0" }
-sgx_rand = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk.git", tag = "v1.1.0" }

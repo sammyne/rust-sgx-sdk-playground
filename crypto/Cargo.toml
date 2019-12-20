@@ -2,3 +2,7 @@
 members = ["app", "enclave"]
 # below should be comment out to avoid the wired failure to build libsecp256k1
 # default-members = ["app", "enclave"]
+
+[patch."https://github.com/baidu/rust-sgx-sdk"]
+sgx_tstd = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk.git", tag = "v1.1.0" }
+sgx_rand = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk.git", tag = "v1.1.0" }

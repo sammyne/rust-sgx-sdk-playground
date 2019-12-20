@@ -137,7 +137,7 @@ fn init_enclave(enclave_path: &str) -> SgxResult<SgxEnclave> {
         }
     };
 
-    let token_file: path::PathBuf = home_dir.join(ENCLAVE_TOKEN);;
+    let token_file: path::PathBuf = home_dir.join(ENCLAVE_TOKEN);
     if use_token == true {
         match fs::File::open(&token_file) {
             Err(_) => {
@@ -165,13 +165,13 @@ fn init_enclave(enclave_path: &str) -> SgxResult<SgxEnclave> {
         secs_attr: sgx_attributes_t { flags: 0, xfrm: 0 },
         misc_select: 0,
     };
-    let enclave = try!(SgxEnclave::create(
+    let enclave = SgxEnclave::create(
         enclave_path,
         debug,
         &mut launch_token,
         &mut launch_token_updated,
-        &mut misc_attr
-    ));
+        &mut misc_attr,
+    )?;
 
     // Step 3: save the launch token if it is updated
     if use_token == true && launch_token_updated != 0 {

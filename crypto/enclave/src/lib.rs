@@ -26,21 +26,14 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-//#![crate_name = "cryptosampleenclave"]
-//#![crate_type = "staticlib"]
-
-#![cfg_attr(not(target_env = "sgx"), no_std)]
-#![cfg_attr(target_env = "sgx", feature(rustc_private))]
+#![no_std]
 
 extern crate sgx_rand;
 extern crate sgx_tcrypto;
 extern crate sgx_trts;
 extern crate sgx_types;
-#[cfg(not(target_env = "sgx"))]
 #[macro_use]
 extern crate sgx_tstd as std;
-
-//extern crate secp256k1;
 
 use sgx_rand::{Rng, StdRng};
 use sgx_tcrypto::*;
@@ -49,8 +42,6 @@ use sgx_types::*;
 use std::ptr;
 use std::slice;
 use std::vec::Vec;
-
-//use secp256k1;
 
 /// A Ecall function takes a string and output its SHA256 digest.
 ///
