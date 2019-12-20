@@ -52,7 +52,8 @@ impl SGX {
         let is_sim = env::var("SGX_MODE").unwrap_or_else(|_| "SW".to_string()) != "HW";
 
         let rust_sdk_path = env::var("RUST_SGX_SDK").unwrap_or_else(|_| {
-            let dir = fs::canonicalize("../../vendor/rust-sgx-sdk").unwrap();
+            //let dir = fs::canonicalize("../../vendor/rust-sgx-sdk").unwrap();
+            let dir = fs::canonicalize("../../vendor/incubator-teaclave-sgx-sdk").unwrap();
             dir.to_str().unwrap().to_string()
         });
 

@@ -1,18 +1,13 @@
 [package]
 name = "app"
 version = "1.0.0"
-authors = ["Baidu"]
+authors = ["sammyne <lixiangmin01@baidu.com>"]
 build = "build.rs"
 
 [dependencies]
-sgx_types = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk.git", tag = "v1.0.9" }
-sgx_urts = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk.git", tag = "v1.0.9" }
+sgx_types = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk.git", tag = "v1.1.0" }
+sgx_urts = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk.git", tag = "v1.1.0" }
 dirs = "1.0.2"
-
-# [patch.'https://github.com/apache/incubator-teaclave-sgx-sdk.git']
-# sgx_types = { path = "../../../sgx_types" }
-# sgx_urts = { path = "../../../sgx_urts" }
-
 
 [build-dependencies]
 cc = "1.0.45"

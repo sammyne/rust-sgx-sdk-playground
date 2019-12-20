@@ -1,4 +1,3 @@
-[submodule "vendor/rust-sgx-sdk"]
-	path = vendor/rust-sgx-sdk
-	url = https://github.com/baidu/rust-sgx-sdk.git
-	branch = 407cbaaf42939aab78bd8afa14de93fab270f7aa
+[submodule "vendor/incubator-teaclave-sgx-sdk"]
+	path = vendor/incubator-teaclave-sgx-sdk
+	url = https://github.com/apache/incubator-teaclave-sgx-sdk.git

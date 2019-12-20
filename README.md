@@ -61,3 +61,12 @@ make run-hello-world
   for extra edl files. We should keep the these edl synchronized to the version of rust-sgx-sdk in
   use.
 - `libcompiler-rt-patch.a` is to address a potential bug, **so it's optional**.
+
+## Git Tips
+### delete submodules
+```bash
+git submodule deinit ${path-to-submodule}
+git rm --cached ${path-to-submodule}
+
+rm -rf ${path-to-submodule}
+```

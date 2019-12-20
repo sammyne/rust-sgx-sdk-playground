@@ -11,5 +11,5 @@ crate-type = ["staticlib"]
 default = []
 
 [dependencies]
-sgx_types = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk.git", tag = "v1.0.9" }
-sgx_tstd = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk.git", tag = "v1.0.9" }
+sgx_types = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk.git", tag = "v1.1.0" }
+sgx_tstd = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk.git", tag = "v1.1.0" }
