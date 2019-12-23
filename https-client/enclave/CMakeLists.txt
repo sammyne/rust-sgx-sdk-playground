@@ -73,3 +73,7 @@ add_custom_command(TARGET ${enclave} POST_BUILD
         -out ${enclaveLib} -config ${config}
     COMMENT "[SIGN] lib${enclave}.so => ${enclaveLib}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+
+set_property(DIRECTORY PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
+   "${CMAKE_CURRENT_BINARY_DIR}/cargo"
+   "${CMAKE_CURRENT_BINARY_DIR}/lib${rustEnclaveLib}.a")

@@ -1,0 +1,9 @@
+[workspace]
+members = ["app", "enclave"]
+# below should be comment out to avoid the wired failure to build libsecp256k1
+# default-members = ["app", "enclave"]
+
+# The patch below is to avoid the wired 'duplicate lang item' error
+# Potential cause: rev and tag are different
+[patch."https://github.com/apache/teaclave-sgx-sdk"]
+sgx_tstd = { features = ["net"], git = "https://github.com/apache/incubator-teaclave-sgx-sdk", optional = true, tag = "v1.1.0" }
