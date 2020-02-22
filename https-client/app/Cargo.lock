@@ -4,37 +4,37 @@
 name = "app"
 version = "1.0.0"
 dependencies = [
- "cc 1.0.45 (registry+https://github.com/rust-lang/crates.io-index)",
- "sgx_types 1.1.0 (git+https://github.com/apache/incubator-teaclave-sgx-sdk?tag=v1.1.0)",
- "sgx_urts 1.1.0 (git+https://github.com/apache/incubator-teaclave-sgx-sdk?tag=v1.1.0)",
+ "cc 1.0.50 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sgx_types 1.1.0 (git+https://github.com/apache/teaclave-sgx-sdk?rev=v1.1.0)",
+ "sgx_urts 1.1.0 (git+https://github.com/apache/teaclave-sgx-sdk?rev=v1.1.0)",
 ]
 
 [[package]]
 name = "cc"
-version = "1.0.45"
+version = "1.0.50"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "libc"
-version = "0.2.62"
+version = "0.2.67"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "sgx_types"
 version = "1.1.0"
-source = "git+https://github.com/apache/incubator-teaclave-sgx-sdk?tag=v1.1.0#71a88b647bb76a16cbc5c3e29403e2afb67f82fd"
+source = "git+https://github.com/apache/teaclave-sgx-sdk?rev=v1.1.0#71a88b647bb76a16cbc5c3e29403e2afb67f82fd"
 
 [[package]]
 name = "sgx_urts"
 version = "1.1.0"
-source = "git+https://github.com/apache/incubator-teaclave-sgx-sdk?tag=v1.1.0#71a88b647bb76a16cbc5c3e29403e2afb67f82fd"
+source = "git+https://github.com/apache/teaclave-sgx-sdk?rev=v1.1.0#71a88b647bb76a16cbc5c3e29403e2afb67f82fd"
 dependencies = [
- "libc 0.2.62 (registry+https://github.com/rust-lang/crates.io-index)",
- "sgx_types 1.1.0 (git+https://github.com/apache/incubator-teaclave-sgx-sdk?tag=v1.1.0)",
+ "libc 0.2.67 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sgx_types 1.1.0 (git+https://github.com/apache/teaclave-sgx-sdk?rev=v1.1.0)",
 ]
 
 [metadata]
-"checksum cc 1.0.45 (registry+https://github.com/rust-lang/crates.io-index)" = "4fc9a35e1f4290eb9e5fc54ba6cf40671ed2a2514c3eeb2b2a908dda2ea5a1be"
-"checksum libc 0.2.62 (registry+https://github.com/rust-lang/crates.io-index)" = "34fcd2c08d2f832f376f4173a231990fa5aef4e99fb569867318a227ef4c06ba"
-"checksum sgx_types 1.1.0 (git+https://github.com/apache/incubator-teaclave-sgx-sdk?tag=v1.1.0)" = "<none>"
-"checksum sgx_urts 1.1.0 (git+https://github.com/apache/incubator-teaclave-sgx-sdk?tag=v1.1.0)" = "<none>"
+"checksum cc 1.0.50 (registry+https://github.com/rust-lang/crates.io-index)" = "95e28fa049fda1c330bcf9d723be7663a899c4679724b34c81e9f5a326aab8cd"
+"checksum libc 0.2.67 (registry+https://github.com/rust-lang/crates.io-index)" = "eb147597cdf94ed43ab7a9038716637d2d1bf2bc571da995d0028dec06bd3018"
+"checksum sgx_types 1.1.0 (git+https://github.com/apache/teaclave-sgx-sdk?rev=v1.1.0)" = "<none>"
+"checksum sgx_urts 1.1.0 (git+https://github.com/apache/teaclave-sgx-sdk?rev=v1.1.0)" = "<none>"

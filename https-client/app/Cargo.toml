@@ -6,8 +6,8 @@ build = "build.rs"
 edition = "2018"
 
 [dependencies]
-sgx_types = { git = "https://github.com/apache/teaclave-sgx-sdk", tag = "v1.1.0" }
-sgx_urts = { git = "https://github.com/apache/teaclave-sgx-sdk", tag = "v1.1.0" }
+sgx_types = { git = "https://github.com/apache/teaclave-sgx-sdk", rev = "v1.1.0" }
+sgx_urts = { git = "https://github.com/apache/teaclave-sgx-sdk", rev = "v1.1.0" }
 
 [build-dependencies]
 cc = "1.0.45"
