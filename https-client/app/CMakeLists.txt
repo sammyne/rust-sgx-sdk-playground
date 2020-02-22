@@ -11,6 +11,11 @@ add_custom_target(${app} ALL
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+add_custom_target(format-${app}
+    cargo fmt
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
 add_custom_target(run-${PROJECT_NAME}
     ${appBin} ${PROJECT_BINARY_DIR}/enclave/${enclaveLib}
     DEPENDS ${app} ${enclave}

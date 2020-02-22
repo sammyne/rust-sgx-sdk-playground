@@ -17,5 +17,7 @@ sgx_tstd = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk", tag =
 
 [dependencies.http_req]
 git = "https://github.com/mesalock-linux/http_req-sgx"
-rev = "546a257e961c22d8e0a4d7787aafe70130874dca"
-#path = "../http_req-sgx"
+tag = "sgx_1.1.0"
+
+[patch."https://github.com/apache/teaclave-sgx-sdk"]
+sgx_tstd = { features = ["net"], git = "https://github.com/apache/incubator-teaclave-sgx-sdk", tag = "v1.1.0" }

@@ -1,31 +1,3 @@
-// Copyright (C) 2017-2019 Baidu, Inc. All Rights Reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions
-// are met:
-//
-//  * Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
-//  * Redistributions in binary form must reproduce the above copyright
-//    notice, this list of conditions and the following disclaimer in
-//    the documentation and/or other materials provided with the
-//    distribution.
-//  * Neither the name of Baidu, Inc., nor the names of its
-//    contributors may be used to endorse or promote products derived
-//    from this software without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 #![no_std]
 
 #[macro_use]
@@ -33,24 +5,40 @@ extern crate sgx_tstd as std;
 extern crate sgx_types;
 
 extern crate http_req;
-use http_req::{request::RequestBuilder, tls, uri::Uri};
 
-use sgx_types::*;
 use std::ffi::CStr;
 use std::net::TcpStream;
-use std::os::raw::{c_int,c_char};
+use std::os::raw::c_char;
 use std::prelude::v1::*;
 
+use sgx_types::*;
+
+use http_req::{request::RequestBuilder, tls, uri::Uri};
+
 #[no_mangle]
-pub extern "C" fn send_http_request(fd: c_int, hostname: *const c_char) -> sgx_status_t {
-    let hostname = unsafe { CStr::from_ptr(hostname).to_str() };
-    let hostname = hostname.expect("Failed to recover hostname");
+pub extern "C" fn send_http_request(uri_str: *const c_char) -> sgx_status_t {
+    let uri_str = unsafe {
+        CStr::from_ptr(uri_str)
+            .to_str()
+            .expect("Failed to recover hostname")
+    };
 
     //Parse uri and assign it to variable `addr`
-    let addr: Uri = hostname.parse().unwrap();
+    let addr: Uri = uri_str.parse().unwrap();
 
     //Connect to remote host
-    let stream = TcpStream::new(fd).unwrap();
+    let stream = {
+        // port is required
+        let host_port = format!(
+            "{}:{}",
+            addr.host().expect("missing host"),
+            addr.port().unwrap_or(addr.corr_port()),
+        );
+
+        println!("connecting to {}", host_port);
+
+        TcpStream::connect(&host_port).expect("failed to connect")
+    };
 
     //Open secure connection over TlsStream, because of `addr` (https)
     let mut stream = tls::Config::default()

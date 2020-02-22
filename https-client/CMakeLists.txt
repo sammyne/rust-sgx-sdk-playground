@@ -17,7 +17,6 @@ set(key ${enclavePath}/isv.pem)
 add_subdirectory(enclave)
 add_subdirectory(app)
 
-add_custom_target(${PROJECT_NAME}-format
-    cargo fmt
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+add_custom_target(format-${PROJECT_NAME}
+    DEPENDS format-${app} format-${enclave}
 )

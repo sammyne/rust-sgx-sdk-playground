@@ -77,3 +77,8 @@ add_custom_command(TARGET ${enclave} POST_BUILD
 set_property(DIRECTORY PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
    "${CMAKE_CURRENT_BINARY_DIR}/cargo"
    "${CMAKE_CURRENT_BINARY_DIR}/lib${rustEnclaveLib}.a")
+
+add_custom_target(format-${enclave}
+    cargo fmt
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
