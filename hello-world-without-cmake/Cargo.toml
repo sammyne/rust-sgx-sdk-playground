@@ -1,4 +1,0 @@
-[workspace]
-members = ["app","enclave"]
-# below should be comment out to avoid the wired failure to build libsecp256k1
-# default-members = ["app","enclave"]

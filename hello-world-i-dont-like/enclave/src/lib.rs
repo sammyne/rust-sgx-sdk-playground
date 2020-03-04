@@ -38,12 +38,6 @@ use std::slice;
 use std::string::String;
 use std::vec::Vec;
 
-use std::os::raw::c_char;
-
-extern "C" {
-    pub fn ocall_say_hello_to(who: *const c_char) -> sgx_status_t;
-}
-
 #[no_mangle]
 pub extern "C" fn say_something(some_string: *const u8, some_len: usize) -> sgx_status_t {
     let str_slice = unsafe { slice::from_raw_parts(some_string, some_len) };
@@ -71,13 +65,4 @@ pub extern "C" fn say_something(some_string: *const u8, some_len: usize) -> sgx_
     println!("{}", &hello_string);
 
     sgx_status_t::SGX_SUCCESS
-}
-
-#[no_mangle]
-pub extern "C" fn ecall_say_hello_to(who: *const c_char) -> sgx_status_t {
-    println!("ecall_say_hello_to...");
-    let status = unsafe { ocall_say_hello_to(who) };
-    println!("done ecall_say_hello_to");
-
-    status
 }

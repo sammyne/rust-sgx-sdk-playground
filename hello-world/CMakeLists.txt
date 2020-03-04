@@ -5,7 +5,6 @@ project(hello-world)
 #set(appPath ${CMAKE_CURRENT_SOURCE_DIR}/app)
 set(enclavePath ${CMAKE_CURRENT_SOURCE_DIR}/enclave)
 
-#set(enclave enclave)
 set(app ${PROJECT_NAME}-app)
 set(enclave ${PROJECT_NAME}-enclave)
 
@@ -17,7 +16,6 @@ set(key ${enclavePath}/isv.pem)
 add_subdirectory(enclave)
 add_subdirectory(app)
 
-add_custom_target(${PROJECT_NAME}-format
-    cargo fmt
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+add_custom_target(format-${PROJECT_NAME}
+    DEPENDS format-${app} format-${enclave}
 )

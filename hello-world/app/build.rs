@@ -1,52 +1,125 @@
-// Copyright (C) 2017-2019 Baidu, Inc. All Rights Reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions
-// are met:
-//
-//  * Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
-//  * Redistributions in binary form must reproduce the above copyright
-//    notice, this list of conditions and the following disclaimer in
-//    the documentation and/or other materials provided with the
-//    distribution.
-//  * Neither the name of Baidu, Inc., nor the names of its
-//    contributors may be used to endorse or promote products derived
-//    from this software without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+use std::{env, fs, process};
 
-use std::env;
+struct SGX {
+    sdk_dir: String,
+    lib_dir: String,
+    edger8r: String,
+    is_sim: bool,
 
-fn main () {
+    rts_lib: String,
 
-    let sdk_dir = env::var("SGX_SDK")
-                    .unwrap_or_else(|_| "/opt/intel/sgxsdk".to_string());
-    let is_sim = env::var("SGX_MODE")
-                    .unwrap_or_else(|_| "SW".to_string());
+    rust_sdk_path: String,
+}
 
-    let bridge_dir = env::var("BRIDGE_LIB_PATH")
-                    .unwrap_or_else(|_| ".".to_string());
-    let bridge_lib = env::var("BRIDGE_LIB_NAME")
-                    .unwrap_or_else(|_| "enclave_u".to_string());
+impl SGX {
+    fn new(c_sdk_path: &str, is_sim: bool, rust_sdk_path: &str) -> Result<Self, String> {
+        // @TODO check existence of directory and files
 
-    println!("cargo:rustc-link-search=native={}", bridge_dir);
+        let sdk_dir = c_sdk_path.to_string();
+        let lib_dir = format!("{}/lib64", &sdk_dir);
+        let edger8r = format!("{}/bin/x64/sgx_edger8r", &sdk_dir);
+
+        let rts_lib = {
+            let suffix = match is_sim {
+                true => "_sim",
+                _ => "",
+            };
+
+            format!("sgx_urts{}", suffix)
+        };
+
+        Ok(SGX {
+            sdk_dir,
+            lib_dir,
+            edger8r,
+            is_sim,
+
+            rts_lib,
+
+            rust_sdk_path: rust_sdk_path.to_string(),
+        })
+    }
+
+    /// @dev 3 env variables are read by this method
+    ///     - SGX_SDK: path of intel SGX sdk
+    ///     - SGX_MODE: mode of the built app
+    ///     - RUST_SGX_SDK: path of rust-sgx-sdk
+    /// @dev since SGX_MODE is used by some unknown process, the replacement by the 'PROFILE'
+    ///     option of 'cargo build' still failed
+    fn from_env() -> Result<Self, String> {
+        let c_sdk_path = env::var("SGX_SDK").unwrap_or_else(|_| "/opt/sgxsdk".to_string());
+
+        let is_sim = env::var("SGX_MODE").unwrap_or_else(|_| "SW".to_string()) != "HW";
+
+        let rust_sdk_path = env::var("RUST_SGX_SDK").unwrap_or_else(|_| {
+            let dir = fs::canonicalize("../../vendor/incubator-teaclave-sgx-sdk").unwrap();
+            dir.to_str().unwrap().to_string()
+        });
+
+        Self::new(&c_sdk_path, is_sim, &rust_sdk_path)
+    }
+}
+
+fn build_bridge_lib(sgx: &SGX, out_dir: &str) -> String {
+    let lib_name = "enclave_u";
+    let src = format!("{}/{}.c", out_dir, lib_name);
+
+    let mut flags = match sgx.is_sim {
+        true => "-g -O2".to_string(),
+        _ => "-m64 -O0 -g".to_string(),
+    };
+    flags += " -fPIC -Wno-attributes";
+
+    // default is a static library
+    let mut build = cc::Build::new();
+
+    build.file(src);
+
+    for flag in flags.split_whitespace() {
+        build.flag(flag);
+    }
+
+    // path to include, **order is important**
+    build
+        .include(format!("{}/edl", sgx.rust_sdk_path))
+        .include(format!("{}/include", sgx.sdk_dir))
+        .include(out_dir);
+
+    build.compile(lib_name);
+
+    lib_name.to_string()
+}
+
+fn generate_bridge(sgx: &SGX, untrusted_dir: &str) {
+    let mut cmd = process::Command::new(&sgx.edger8r);
+
+    cmd.args(&["--untrusted", "enclave.edl"]);
+
+    let search_paths = format!(
+        "../enclave {}/include {}/edl",
+        &sgx.sdk_dir, &sgx.rust_sdk_path
+    );
+    for v in search_paths.split_whitespace() {
+        cmd.args(&["--search-path", v]);
+    }
+
+    cmd.args(&["--untrusted-dir", untrusted_dir]);
+
+    cmd.output().unwrap();
+}
+
+fn main() {
+    let out_dir = env::var("OUT_DIR").expect("missing OUT_DIR");
+
+    let sgx = SGX::from_env().expect("failed to load config for SGX from env");
+
+    generate_bridge(&sgx, &out_dir);
+
+    let bridge_lib = build_bridge_lib(&sgx, &out_dir);
+
+    println!("cargo:rustc-link-search=native={}", out_dir);
     println!("cargo:rustc-link-lib=static={}", bridge_lib);
 
-    println!("cargo:rustc-link-search=native={}/lib64", sdk_dir);
-    match is_sim.as_ref() {
-        "SW" => println!("cargo:rustc-link-lib=dylib=sgx_urts_sim"),
-        "HW" => println!("cargo:rustc-link-lib=dylib=sgx_urts"),
-        _    => println!("cargo:rustc-link-lib=dylib=sgx_urts"), // Treat undefined as HW
-    }
+    println!("cargo:rustc-link-search=native={}", sgx.lib_dir);
+    println!("cargo:rustc-link-lib=dylib={}", sgx.rts_lib);
 }

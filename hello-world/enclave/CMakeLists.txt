@@ -6,8 +6,6 @@ set(serviceLib sgx_tservice${enclaveLibSuffix})
 set(cLib sgx_tstdc)
 set(cxxLib sgx_tcxx)
 set(cryptoLib sgx_tcrypto)
-set(fsLib sgx_tprotected_fs)
-set(kxLib sgx_tkey_exchange)
 
 set(addonLibPath ${CMAKE_CURRENT_BINARY_DIR})
 set(rustEnclaveLib "enclave_rust")
@@ -76,6 +74,7 @@ add_custom_command(TARGET ${enclave} POST_BUILD
     COMMENT "[SIGN] lib${enclave}.so => ${enclaveLib}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
-set_property(DIRECTORY PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
-   "${CMAKE_CURRENT_BINARY_DIR}/cargo"
-   "${CMAKE_CURRENT_BINARY_DIR}/lib${rustEnclaveLib}.a")
+add_custom_target(format-${enclave}
+    cargo fmt
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)

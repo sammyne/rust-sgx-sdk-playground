@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(hello-world-without-cmake)
+project(hello-world-i-dont-like)
 
 #set(appPath ${CMAKE_CURRENT_SOURCE_DIR}/app)
 set(enclavePath ${CMAKE_CURRENT_SOURCE_DIR}/enclave)

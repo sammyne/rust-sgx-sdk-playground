@@ -29,50 +29,23 @@
 extern crate dirs;
 extern crate sgx_types;
 extern crate sgx_urts;
+
 use sgx_types::*;
 use sgx_urts::SgxEnclave;
 
-use std::ffi::{self, CString};
 use std::fs;
 use std::io::{Read, Write};
-use std::os::raw::c_char;
 use std::path;
 
-//static ENCLAVE_FILE: &'static str = "enclave.signed.so";
 static ENCLAVE_TOKEN: &'static str = "enclave.token";
 
 extern "C" {
-    fn ecall_say_hello_to(
-        eid: sgx_enclave_id_t,
-        retval: *mut sgx_status_t,
-        who: *const c_char,
-    ) -> sgx_status_t;
-
     fn say_something(
         eid: sgx_enclave_id_t,
         retval: *mut sgx_status_t,
         some_string: *const u8,
         len: usize,
     ) -> sgx_status_t;
-}
-
-#[no_mangle]
-pub extern "C" fn ocall_say_hello_to(c_who: *const c_char) {
-    if c_who.is_null() {
-        println!("nil pointer");
-        return;
-    }
-
-    let who = unsafe { ffi::CStr::from_ptr(c_who).to_str().expect("invalid string") };
-
-    println!("hello from ocall, {}", who);
-}
-
-fn panic_if_not_success(status: sgx_status_t, tip: &str) {
-    match status {
-        sgx_status_t::SGX_SUCCESS => {}
-        _ => panic!(format!("[-] {} {}!", tip, status.as_str())),
-    }
 }
 
 fn init_enclave(enclave_path: &str) -> SgxResult<SgxEnclave> {
@@ -123,13 +96,13 @@ fn init_enclave(enclave_path: &str) -> SgxResult<SgxEnclave> {
         secs_attr: sgx_attributes_t { flags: 0, xfrm: 0 },
         misc_select: 0,
     };
-    let enclave = try!(SgxEnclave::create(
+    let enclave = SgxEnclave::create(
         enclave_path,
         debug,
         &mut launch_token,
         &mut launch_token_updated,
-        &mut misc_attr
-    ));
+        &mut misc_attr,
+    )?;
 
     // Step 3: save the launch token if it is updated
     if use_token == true && launch_token_updated != 0 {
@@ -168,7 +141,9 @@ fn main() {
     };
 
     let input_string = String::from("This is a normal world string passed into Enclave!\n");
+
     let mut retval = sgx_status_t::SGX_SUCCESS;
+
     let result = unsafe {
         say_something(
             enclave.geteid(),
@@ -178,21 +153,15 @@ fn main() {
         )
     };
 
-    panic_if_not_success(result, "say_something failed result");
-    panic_if_not_success(retval, "say_something failed retval");
+    match result {
+        sgx_status_t::SGX_SUCCESS => {}
+        _ => {
+            println!("[-] ECALL Enclave Failed {}!", result.as_str());
+            return;
+        }
+    }
 
     println!("[+] say_something success...");
-
-    // &str will failed due to missing terminating '\0'
-    let me = CString::new("sammyne").expect("failed to initialize me");
-
-    let mut retval = sgx_status_t::SGX_SUCCESS;
-    let result = unsafe { ecall_say_hello_to(enclave.geteid(), &mut retval, me.as_ptr()) };
-
-    panic_if_not_success(result, "ecall_say_hello_to failed result");
-    panic_if_not_success(retval, "ecall_say_hello_to failed retval");
-
-    println!("[+] ecall_say_hello_to success...");
 
     enclave.destroy();
 }
