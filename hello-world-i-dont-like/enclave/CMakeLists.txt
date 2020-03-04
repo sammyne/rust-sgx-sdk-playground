@@ -15,8 +15,8 @@ set(rustEnclaveLib "enclave_rust")
 ## rust sdk must come before official SGX
 include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
-    ${rustSGXPath}/common/inc
-    ${rustSGXPath}/edl
+    ${rsgxPath}/common/inc
+    ${rsgxPath}/edl
     ${sgxPath}/include 
     ${sgxPath}/include/tlibc
     ${sgxPath}/include/stlport
@@ -52,7 +52,7 @@ add_custom_command(
     OUTPUT ${bridge}
     COMMAND ${sgxEdger8r} --trusted ${edl} 
        --search-path ${enclavePath} --search-path ${sgxPath}/include
-       --search-path ${rustSGXPath}/edl
+       --search-path ${rsgxPath}/edl
     COMMENT "[GEN] => ${bridge}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 

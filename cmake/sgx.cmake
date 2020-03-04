@@ -22,6 +22,6 @@ set(sgxEdger8r ${sgxPath}/bin/x64/sgx_edger8r)
 set(sgxSigner ${sgxPath}/bin/x64/sgx_sign)
 
 # rust-sgx-sdk
-set(rustSGXPath ${PROJECT_SOURCE_DIR}/vendor/incubator-teaclave-sgx-sdk)
+set(rsgxPath ${PROJECT_SOURCE_DIR}/vendor/incubator-teaclave-sgx-sdk)
 
 message(STATUS "SGX_MODE=${SGX_MODE}")

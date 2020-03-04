@@ -13,7 +13,7 @@ set(uBridgeLib ${PROJECT_NAME}-enclave_u)
 set(uBridgeLibPath ${CMAKE_CURRENT_BINARY_DIR})
 
 include_directories(
-    ${rustSGXPath}/edl
+    ${rsgxPath}/edl
     ${sgxPath}/include 
     ${CMAKE_CURRENT_BINARY_DIR}
 )
@@ -22,7 +22,7 @@ add_custom_command(
     OUTPUT ${bridge}
     COMMAND ${sgxEdger8r} --untrusted ${edl} 
        --search-path ${enclavePath} --search-path ${sgxPath}/include
-       --search-path ${rustSGXPath}/edl
+       --search-path ${rsgxPath}/edl
     COMMENT "[GEN] => ${bridge}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
