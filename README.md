@@ -42,13 +42,14 @@ make run-hello-world
 
 > The mitigration towards incubator-teaclave-sgx-sdk@v1.1.0 is WIP
 
-|                   Project | Description                                                |
-| ------------------------: | :--------------------------------------------------------- |
-|                    crypto | cryptographic primitives                                   |
-|               hello-world | hello-world example                                        |
-|              https-client | a https client running within enclaves                     |
-| hello-world-without-cmake | hello-world example with app built with cargo build script |
-|                tls-server | a TLS server running within enclaves                       |
+|                 Project | Description                                                                                         |
+| ----------------------: | :-------------------------------------------------------------------------------------------------- |
+|                  crypto | cryptographic primitives                                                                            |
+|             hello-world | hello-world example with app built with cargo build script                                          |
+|       hello-world-debug | hello-world example demonstrating `sgx-gdb`-based debugging and `sgx_emmt`-based memory measurement |
+| hello-world-i-dont-like | hello-world example                                                                                 |
+|            https-client | a https client running within enclaves                                                              |
+|              tls-server | a TLS server running within enclaves                                                                |
 
 ## FYI
 - In the hardware mode, please employ the specific rust toolchain tagged by `nightly-2019-08-01`

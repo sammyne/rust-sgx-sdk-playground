@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 
+# -ggdb: enable debugging with GDB
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "")
-   set(sgxFlags "-m64 -O0 -g")
+   set(sgxFlags "-m64 -ggdb -O0 -g")
    set(enclaveLibSuffix _sim)
    set(SGX_MODE SW)
 elseif(CMAKE_BUILD_TYPE STREQUAL "Prerelease")
