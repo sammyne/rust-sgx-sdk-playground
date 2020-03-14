@@ -28,3 +28,12 @@ itertools   = { version = "0.8", default-features = false, features = []}
 rustls      = { git = "https://github.com/mesalock-linux/rustls", branch = "mesalock_sgx-client-cert-verifier-patch" }
 webpki      = { git = "https://github.com/mesalock-linux/webpki", branch = "mesalock_sgx" }
 webpki-roots= { git = "https://github.com/mesalock-linux/webpki-roots", branch = "mesalock_sgx" }
+
+[dependencies.http_req]
+git = "https://github.com/mesalock-linux/http_req-sgx"
+tag = "sgx_1.1.0"
+
+[dependencies.lazy_static]
+default-features = false
+features = ["spin_no_std"]
+version = "1.4.0"

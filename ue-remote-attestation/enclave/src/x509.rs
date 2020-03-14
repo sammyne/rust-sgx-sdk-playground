@@ -1,9 +1,10 @@
+#![deny(unused)]
+
 use std::prelude::v1::*;
 use std::str;
 use std::time::*;
 use std::untrusted::time::SystemTimeEx;
 
-use sgx_tcrypto::*;
 use sgx_types::*;
 
 use bit_vec::BitVec;
@@ -13,24 +14,32 @@ use chrono::Utc as TzUtc;
 use num_bigint::BigUint;
 use yasna::models::ObjectIdentifier;
 
-use super::CERTEXPIRYDAYS;
+use crate::crypto::ecdsa::{self, PrivateKey};
+
 const ISSUER: &str = "MesaTEE";
 const SUBJECT: &str = "MesaTEE";
 
-pub fn gen_ecc_cert(
+pub const CERTEXPIRYDAYS: i64 = 90i64;
+
+lazy_static! {
+    static ref OID_ECDSA_WITH_SHA256: ObjectIdentifier =
+        ObjectIdentifier::from_slice(&[1, 2, 840, 10045, 4, 3, 2]);
+    static ref OID_COMMON_NAME: ObjectIdentifier = ObjectIdentifier::from_slice(&[2, 5, 4, 3]);
+
+    /// defined in https://tools.ietf.org/pdf/rfc3279.pdf#2.3.5
+    static ref OID_EC_PUBLIC_KEY: ObjectIdentifier =
+        ObjectIdentifier::from_slice(&[1, 2, 840, 10045, 2, 1]);
+    static ref OID_ECPK_PARAMETERS_NAMED_CURVE_PRIME256V1:  ObjectIdentifier= ObjectIdentifier::from_slice(&[1, 2, 840, 10045, 3, 1, 7]);
+
+    /// http://oid-info.com/cgi-bin/display?oid=2.16.840.1.113730.1.13&action=display
+    static ref OID_FREE_FORM_TEXT_COMMENT:  ObjectIdentifier= ObjectIdentifier::from_slice(&[2, 16, 840, 1, 113730, 1, 13]);
+}
+
+pub fn generate_self_signed_cert(
     payload: String,
-    prv_k: &sgx_ec256_private_t,
-    pub_k: &sgx_ec256_public_t,
-    ecc_handle: &SgxEccHandle,
+    priv_key: &PrivateKey,
 ) -> Result<(Vec<u8>, Vec<u8>), sgx_status_t> {
-    // Generate public key bytes since both DER will use it
-    let mut pub_key_bytes: Vec<u8> = vec![4];
-    let mut pk_gx = pub_k.gx.clone();
-    pk_gx.reverse();
-    let mut pk_gy = pub_k.gy.clone();
-    pk_gy.reverse();
-    pub_key_bytes.extend_from_slice(&pk_gx);
-    pub_key_bytes.extend_from_slice(&pk_gy);
+    let pub_key_bytes = priv_key.public().marshal_as_uncompressed();
 
     // Generate Certificate DER
     let cert_der = yasna::construct_der(|writer| {
@@ -46,17 +55,13 @@ pub fn gen_ecc_cert(
                 writer.next().write_u8(1);
                 // Signature Algorithm: ecdsa-with-SHA256
                 writer.next().write_sequence(|writer| {
-                    writer
-                        .next()
-                        .write_oid(&ObjectIdentifier::from_slice(&[1, 2, 840, 10045, 4, 3, 2]));
+                    writer.next().write_oid(&OID_ECDSA_WITH_SHA256);
                 });
                 // Issuer: CN=MesaTEE (unused but required)
                 writer.next().write_sequence(|writer| {
                     writer.next().write_set(|writer| {
                         writer.next().write_sequence(|writer| {
-                            writer
-                                .next()
-                                .write_oid(&ObjectIdentifier::from_slice(&[2, 5, 4, 3]));
+                            writer.next().write_oid(&OID_COMMON_NAME);
                             writer.next().write_utf8_string(&ISSUER);
                         });
                     });
@@ -78,9 +83,7 @@ pub fn gen_ecc_cert(
                 writer.next().write_sequence(|writer| {
                     writer.next().write_set(|writer| {
                         writer.next().write_sequence(|writer| {
-                            writer
-                                .next()
-                                .write_oid(&ObjectIdentifier::from_slice(&[2, 5, 4, 3]));
+                            writer.next().write_oid(&OID_COMMON_NAME);
                             writer.next().write_utf8_string(&SUBJECT);
                         });
                     });
@@ -89,13 +92,11 @@ pub fn gen_ecc_cert(
                     // Public Key Algorithm
                     writer.next().write_sequence(|writer| {
                         // id-ecPublicKey
-                        writer
-                            .next()
-                            .write_oid(&ObjectIdentifier::from_slice(&[1, 2, 840, 10045, 2, 1]));
+                        writer.next().write_oid(&OID_EC_PUBLIC_KEY);
                         // prime256v1
                         writer
                             .next()
-                            .write_oid(&ObjectIdentifier::from_slice(&[1, 2, 840, 10045, 3, 1, 7]));
+                            .write_oid(&OID_ECPK_PARAMETERS_NAMED_CURVE_PRIME256V1);
                     });
                     // Public Key
                     writer
@@ -108,9 +109,7 @@ pub fn gen_ecc_cert(
                     .write_tagged(yasna::Tag::context(3), |writer| {
                         writer.write_sequence(|writer| {
                             writer.next().write_sequence(|writer| {
-                                writer.next().write_oid(&ObjectIdentifier::from_slice(&[
-                                    2, 16, 840, 1, 113730, 1, 13,
-                                ]));
+                                writer.next().write_oid(&OID_FREE_FORM_TEXT_COMMENT);
                                 writer.next().write_bytes(&payload.into_bytes());
                             });
                         });
@@ -118,14 +117,12 @@ pub fn gen_ecc_cert(
             });
             // Signature Algorithm: ecdsa-with-SHA256
             writer.next().write_sequence(|writer| {
-                writer
-                    .next()
-                    .write_oid(&ObjectIdentifier::from_slice(&[1, 2, 840, 10045, 4, 3, 2]));
+                writer.next().write_oid(&OID_ECDSA_WITH_SHA256);
             });
             // Signature
             let sig = {
                 let tbs = &writer.buf[4..];
-                ecc_handle.ecdsa_sign_slice(tbs, &prv_k).unwrap()
+                ecdsa::sign(priv_key, tbs).expect("fail to sign TBS")
             };
             let sig_der = yasna::construct_der(|writer| {
                 writer.write_sequence(|writer| {
@@ -156,8 +153,7 @@ pub fn gen_ecc_cert(
             let inner_key_der = yasna::construct_der(|writer| {
                 writer.write_sequence(|writer| {
                     writer.next().write_u8(1);
-                    let mut prv_k_r = prv_k.r.clone();
-                    prv_k_r.reverse();
+                    let prv_k_r = priv_key.as_bytes();
                     writer.next().write_bytes(&prv_k_r);
                     writer
                         .next()

@@ -17,9 +17,7 @@ extern "C" {
 
 mod ocall;
 
-pub use ocall::{
-    ocall_get_quote, ocall_get_update_info, ocall_sgx_init_quote,
-};
+pub use ocall::{ocall_get_quote, ocall_get_update_info, ocall_sgx_init_quote};
 
 fn init_enclave(enclave_path: &str) -> SgxResult<SgxEnclave> {
     let mut launch_token: sgx_launch_token_t = [0; 1024];

@@ -17,6 +17,7 @@ pub extern "C" fn ocall_get_quote(
 
     let mut real_quote_len: u32 = 0;
 
+    // @TODO: test the case of p_sigrl!=null and sigrl_len=0
     let ret = unsafe { sgx_calc_quote_size(p_sigrl, sigrl_len, &mut real_quote_len as *mut u32) };
 
     if ret != sgx_status_t::SGX_SUCCESS {
@@ -44,11 +45,11 @@ pub extern "C" fn ocall_get_quote(
     };
 
     if ret != sgx_status_t::SGX_SUCCESS {
-        println!("sgx_calc_quote_size returned {}", ret);
+        println!("sgx_get_quote fail with {}", ret);
         return ret;
     }
 
-    println!("sgx_calc_quote_size returned {}", ret);
+    println!("sgx_get_quote returned {}", ret);
 
     ret
 }
