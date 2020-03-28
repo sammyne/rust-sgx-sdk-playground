@@ -16,3 +16,7 @@ set(key ${enclavePath}/isv.pem)
 
 add_subdirectory(enclave)
 add_subdirectory(app)
+
+add_custom_target(format-${PROJECT_NAME}
+    DEPENDS format-${app} format-${enclave}
+)

@@ -1,3 +1,4 @@
+use std::io::{self, Write};
 use std::{env, fs, process};
 
 struct SGX {
@@ -51,12 +52,12 @@ impl SGX {
     /// @dev since SGX_MODE is used by some unknown process, the replacement by the 'PROFILE'
     ///     option of 'cargo build' still failed
     fn from_env() -> Result<Self, String> {
-        let c_sdk_path = env::var("SGX_SDK").unwrap_or_else(|_| "/opt/sgxsdk".to_string());
+        let c_sdk_path = env::var("SGX_SDK").unwrap_or_else(|_| "/opt/intel/sgxsdk".to_string());
 
         let is_sim = env::var("SGX_MODE").unwrap_or_else(|_| "SW".to_string()) != "HW";
 
         let rust_sdk_path = env::var("RUST_SGX_SDK").unwrap_or_else(|_| {
-            let dir = fs::canonicalize("../../vendor/rust-sgx-sdk").unwrap();
+            let dir = fs::canonicalize("../../vendor/incubator-teaclave-sgx-sdk").unwrap();
             dir.to_str().unwrap().to_string()
         });
 
@@ -109,7 +110,16 @@ fn generate_bridge(sgx: &SGX, untrusted_dir: &str) {
 
     cmd.args(&["--untrusted-dir", untrusted_dir]);
 
-    cmd.output().unwrap();
+    println!("command to generate bridges go as: {:?}", cmd);
+
+    let output = cmd.output().unwrap();
+
+    if !output.status.success() {
+        eprintln!("status: {}", output.status);
+        io::stdout().write_all(&output.stdout).unwrap();
+        io::stderr().write_all(&output.stderr).unwrap();
+        panic!("failed to generate bridges for app");
+    }
 }
 
 fn main() {

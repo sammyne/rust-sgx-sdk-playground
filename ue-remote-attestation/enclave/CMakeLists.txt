@@ -73,3 +73,8 @@ add_custom_command(TARGET ${enclave} POST_BUILD
         -out ${enclaveLib} -config ${config}
     COMMENT "[SIGN] lib${enclave}.so => ${enclaveLib}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+
+add_custom_target(format-${enclave}
+    cargo fmt
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)

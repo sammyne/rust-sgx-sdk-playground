@@ -1,38 +1,10 @@
-// Copyright (C) 2017-2019 Baidu, Inc. All Rights Reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions
-// are met:
-//
-//  * Redistributions of source code must retain the above copyright
-//    notice, this list of conditions and the following disclaimer.
-//  * Redistributions in binary form must reproduce the above copyright
-//    notice, this list of conditions and the following disclaimer in
-//    the documentation and/or other materials provided with the
-//    distribution.
-//  * Neither the name of Baidu, Inc., nor the names of its
-//    contributors may be used to endorse or promote products derived
-//    from this software without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#![no_std]
 
-#![cfg_attr(not(target_env = "sgx"), no_std)]
-#![cfg_attr(target_env = "sgx", feature(rustc_private))]
-#![warn(unused_extern_crates)]
-
-#[cfg(not(target_env = "sgx"))]
+extern crate sgx_types;
 #[macro_use]
 extern crate sgx_tstd as std;
+
+use std::prelude::v1::*;
 
 use sgx_rand::*;
 use sgx_tcrypto::*;
@@ -42,12 +14,8 @@ use sgx_types::*;
 use itertools::Itertools;
 use std::io::{BufReader, Read, Write};
 use std::net::TcpStream;
-use std::prelude::v1::*;
-use std::ptr;
-use std::str;
-use std::string::String;
+use std::{ptr,str};
 use std::sync::Arc;
-use std::vec::Vec;
 
 mod cert;
 mod hex;
@@ -63,7 +31,6 @@ extern "C" {
         ret_ti: *mut sgx_target_info_t,
         ret_gid: *mut sgx_epid_group_id_t,
     ) -> sgx_status_t;
-    pub fn ocall_get_ias_socket(ret_val: *mut sgx_status_t, ret_fd: *mut i32) -> sgx_status_t;
     pub fn ocall_get_quote(
         ret_val: *mut sgx_status_t,
         p_sigrl: *const u8,
@@ -92,10 +59,12 @@ fn parse_response_attn_report(resp: &[u8]) -> (String, String, String) {
         Some(401) => "Unauthorized Failed to authenticate or authorize request.",
         Some(404) => "Not Found GID does not refer to a valid EPID group ID.",
         Some(500) => "Internal error occurred",
-        Some(503) => "Service is currently not able to process the request (due to
+        Some(503) => {
+            "Service is currently not able to process the request (due to
             a temporary overloading or maintenance). This is a
             temporary state – the same request can be repeated after
-            some time. ",
+            some time. "
+        }
         _ => {
             println!("DBG:{}", respp.code.unwrap());
             "Unknown error occured"
@@ -158,10 +127,12 @@ fn parse_response_sigrl(resp: &[u8]) -> Vec<u8> {
         Some(401) => msg = "Unauthorized Failed to authenticate or authorize request.",
         Some(404) => msg = "Not Found GID does not refer to a valid EPID group ID.",
         Some(500) => msg = "Internal error occurred",
-        Some(503) => msg = "Service is currently not able to process the request (due to
+        Some(503) => {
+            msg = "Service is currently not able to process the request (due to
             a temporary overloading or maintenance). This is a
             temporary state – the same request can be repeated after
-            some time. ",
+            some time. "
+        }
         _ => msg = "Unknown error occured",
     }
 
@@ -199,10 +170,9 @@ pub fn make_ias_client_config() -> rustls::ClientConfig {
     config
 }
 
-pub fn get_sigrl_from_intel(fd: c_int, gid: u32) -> Vec<u8> {
-    println!("get_sigrl_from_intel fd = {:?}", fd);
+pub fn get_sigrl_from_intel(gid: u32) -> Vec<u8> {
     let config = make_ias_client_config();
-    let ias_key = ias_api_key();
+    let (_, _, ias_key) = ias_config();
 
     let req = format!("GET {}{:08x} HTTP/1.1\r\nHOST: {}\r\nOcp-Apim-Subscription-Key: {}\r\nConnection: Close\r\n\r\n",
                         SIGRL_SUFFIX,
@@ -214,7 +184,9 @@ pub fn get_sigrl_from_intel(fd: c_int, gid: u32) -> Vec<u8> {
 
     let dns_name = webpki::DNSNameRef::try_from_ascii_str(DEV_HOSTNAME).unwrap();
     let mut sess = rustls::ClientSession::new(&Arc::new(config), dns_name);
-    let mut sock = TcpStream::new(fd).unwrap();
+
+    let mut sock =
+        TcpStream::connect(format!("{}:443", DEV_HOSTNAME)).expect("failed to connect");
     let mut tls = rustls::Stream::new(&mut sess, &mut sock);
 
     let _result = tls.write(req.as_bytes());
@@ -238,12 +210,11 @@ pub fn get_sigrl_from_intel(fd: c_int, gid: u32) -> Vec<u8> {
 }
 
 // TODO: support pse
-pub fn get_report_from_intel(fd: c_int, quote: Vec<u8>) -> (String, String, String) {
-    println!("get_report_from_intel fd = {:?}", fd);
+pub fn get_report_from_intel(quote: Vec<u8>) -> (String, String, String) {
     let config = make_ias_client_config();
     let encoded_quote = base64::encode(&quote[..]);
     let encoded_json = format!("{{\"isvEnclaveQuote\":\"{}\"}}\r\n", encoded_quote);
-    let ias_key = ias_api_key();
+    let (_, _, ias_key) = ias_config();
 
     let req = format!("POST {} HTTP/1.1\r\nHOST: {}\r\nOcp-Apim-Subscription-Key:{}\r\nContent-Length:{}\r\nContent-Type: application/json\r\nConnection: close\r\n\r\n{}",
                            REPORT_SUFFIX,
@@ -255,7 +226,9 @@ pub fn get_report_from_intel(fd: c_int, quote: Vec<u8>) -> (String, String, Stri
     println!("{}", req);
     let dns_name = webpki::DNSNameRef::try_from_ascii_str(DEV_HOSTNAME).unwrap();
     let mut sess = rustls::ClientSession::new(&Arc::new(config), dns_name);
-    let mut sock = TcpStream::new(fd).unwrap();
+
+    let mut sock =
+        TcpStream::connect(format!("{}:443", DEV_HOSTNAME)).expect("failed to connect");
     let mut tls = rustls::Stream::new(&mut sess, &mut sock);
 
     let _result = tls.write(req.as_bytes());
@@ -284,7 +257,6 @@ fn as_u32_le(array: &[u8; 4]) -> u32 {
 #[allow(const_err)]
 pub fn create_attestation_report(
     pub_k: &sgx_ec256_public_t,
-    sign_type: sgx_quote_sign_type_t,
 ) -> Result<(String, String, String), sgx_status_t> {
     // Workflow:
     // (1) ocall to get the target_info structure (ti) and epid group id (eg)
@@ -317,24 +289,8 @@ pub fn create_attestation_report(
 
     let eg_num = as_u32_le(&eg);
 
-    // (1.5) get sigrl
-    let mut ias_sock: i32 = 0;
-
-    let res =
-        unsafe { ocall_get_ias_socket(&mut rt as *mut sgx_status_t, &mut ias_sock as *mut i32) };
-
-    if res != sgx_status_t::SGX_SUCCESS {
-        return Err(res);
-    }
-
-    if rt != sgx_status_t::SGX_SUCCESS {
-        return Err(rt);
-    }
-
-    //println!("Got ias_sock = {}", ias_sock);
-
     // Now sigrl_vec is the revocation list, a vec<u8>
-    let sigrl_vec: Vec<u8> = get_sigrl_from_intel(ias_sock, eg_num);
+    let sigrl_vec: Vec<u8> = get_sigrl_from_intel(eg_num);
 
     // (2) Generate the report
     // Fill ecc256 public key into report_data
@@ -383,9 +339,10 @@ pub fn create_attestation_report(
         (sigrl_vec.as_ptr(), sigrl_vec.len() as u32)
     };
     let p_report = (&rep.unwrap()) as *const sgx_report_t;
-    let quote_type = sign_type;
+    //let quote_type = sgx_quote_sign_type_t::SGX_LINKABLE_SIGNATURE;
+    let (quote_type, spid, _) = ias_config();
 
-    let spid: sgx_spid_t = hex::decode_spid("1825E5672DE30E2F0C29C0CCBD193B74");
+    let spid: sgx_spid_t = hex::decode_spid(spid);
 
     let p_spid = &spid as *const sgx_spid_t;
     let p_nonce = &quote_nonce as *const sgx_quote_nonce_t;
@@ -468,81 +425,82 @@ pub fn create_attestation_report(
     }
 
     let quote_vec: Vec<u8> = return_quote_buf[..quote_len as usize].to_vec();
-    let res =
-        unsafe { ocall_get_ias_socket(&mut rt as *mut sgx_status_t, &mut ias_sock as *mut i32) };
+    let (attn_report, sig, cert) = get_report_from_intel(quote_vec);
 
-    if res != sgx_status_t::SGX_SUCCESS {
-        return Err(res);
-    }
-
-    if rt != sgx_status_t::SGX_SUCCESS {
-        return Err(rt);
-    }
-
-    let (attn_report, sig, cert) = get_report_from_intel(ias_sock, quote_vec);
     Ok((attn_report, sig, cert))
 }
 
-fn ias_api_key() -> String {
-    "3e8c48b2c12344b7807fd25761d06067".to_string()
+// subscription type, SPID, API key
+fn ias_config() -> (sgx_quote_sign_type_t, &'static str, &'static str) {
+    (
+        sgx_quote_sign_type_t::SGX_LINKABLE_SIGNATURE,
+        "1825E5672DE30E2F0C29C0CCBD193B74",
+        "3e8c48b2c12344b7807fd25761d06067",
+    )
 }
 
 #[no_mangle]
-pub extern "C" fn listen_and_serve(
-    socket_fd: c_int, sign_type: sgx_quote_sign_type_t) -> sgx_status_t {
+pub extern "C" fn listen_and_serve(socket_fd: c_int) -> sgx_status_t {
     // Generate Keypair
     let ecc_handle = SgxEccHandle::new();
     let _result = ecc_handle.open();
     let (prv_k, pub_k) = ecc_handle.create_key_pair().unwrap();
 
-    let (attn_report, sig, cert) = match create_attestation_report(&pub_k, sign_type) {
+    let (attn_report, sig, cert) = match create_attestation_report(&pub_k) {
         Ok(r) => r,
-        Err(e) => {
-            println!("Error in create_attestation_report: {:?}", e);
-            return e;
+        Err(err) => {
+            println!("Error in create_attestation_report: {:?}", err);
+            return err;
         }
     };
 
     let payload = attn_report + "|" + &sig + "|" + &cert;
     let (key_der, cert_der) = match cert::gen_ecc_cert(payload, &prv_k, &pub_k, &ecc_handle) {
         Ok(r) => r,
-        Err(e) => {
-            println!("Error in gen_ecc_cert: {:?}", e);
-            return e;
+        Err(err) => {
+            println!("Error in gen_ecc_cert: {:?}", err);
+            return err;
         }
     };
     let _result = ecc_handle.close();
 
-    let root_ca_bin = include_bytes!("../../pki/ca.cert");
-    let mut ca_reader = BufReader::new(&root_ca_bin[..]);
-    let mut rc_store = rustls::RootCertStore::empty();
-    // Build a root ca storage
-    rc_store.add_pem_file(&mut ca_reader).unwrap();
+    let ca = {
+        let root_ca_bin = include_bytes!("../../pki/ca.cert");
+        let mut ca_reader = BufReader::new(&root_ca_bin[..]);
+
+        let mut out = rustls::RootCertStore::empty();
+        // Build a root ca storage
+        out.add_pem_file(&mut ca_reader).expect("invalid certs");
+
+        out
+    };
+
     // Build a default authenticator which allow every authenticated client
+    let config = {
+        let authenticator = rustls::AllowAnyAuthenticatedClient::new(ca);
+        let certs = vec![rustls::Certificate(cert_der)];
+        let privkey = rustls::PrivateKey(key_der);
 
-    let authenticator = rustls::AllowAnyAuthenticatedClient::new(rc_store);
-    let mut cfg = rustls::ServerConfig::new(authenticator);
-    let mut certs = Vec::new();
-    certs.push(rustls::Certificate(cert_der));
-    let privkey = rustls::PrivateKey(key_der);
+        let mut c = rustls::ServerConfig::new(authenticator);
 
-    cfg.set_single_cert_with_ocsp_and_sct(certs, privkey, vec![], vec![])
-        .unwrap();
+        c.set_single_cert_with_ocsp_and_sct(certs, privkey, vec![], vec![])
+            .expect("invalid config");
 
-    let mut sess = rustls::ServerSession::new(&Arc::new(cfg));
-    let mut conn = TcpStream::new(socket_fd).unwrap();
+        c
+    };
 
-    let mut tls = rustls::Stream::new(&mut sess, &mut conn);
-    let mut plaintext = [0u8; 1024]; //Vec::new();
-    match tls.read(&mut plaintext) {
+    let mut sess = rustls::ServerSession::new(&Arc::new(config));
+    let mut conn = TcpStream::new(socket_fd).expect("invalid socket to build stream");
+    let mut stream = rustls::Stream::new(&mut sess, &mut conn);
+    let mut plaintext = [0u8; 1024];
+    match stream.read(&mut plaintext) {
         Ok(_) => println!("Client said: {}", str::from_utf8(&plaintext).unwrap()),
-        Err(e) => {
-            println!("Error in read_to_end: {:?}", e);
-            panic!("");
+        Err(err) => {
+            panic!("Error in read_to_end: {:?}", err);
         }
     };
 
-    tls.write("hello back".as_bytes()).unwrap();
+    stream.write("hello back".as_bytes()).unwrap();
 
     sgx_status_t::SGX_SUCCESS
 }
