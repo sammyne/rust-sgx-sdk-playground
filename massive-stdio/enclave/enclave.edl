@@ -1,0 +1,15 @@
+enclave {
+    from "sgx_tstd.edl" import *;
+    from "sgx_stdio.edl" import *;
+    from "sgx_backtrace.edl" import *;
+    from "sgx_tstdc.edl" import *;
+
+    trusted {
+        /* define ECALLs here. */
+        
+        //public void say_something([in, size=len] const uint8_t* some_string, size_t len);
+        public void say_something([user_check] const uint8_t* some_string, size_t len);
+    };
+
+    untrusted { };
+};

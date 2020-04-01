@@ -49,7 +49,8 @@ make run-hello-world
 |       hello-world-debug | hello-world example demonstrating `sgx-gdb`-based debugging and `sgx_emmt`-based memory measurement |
 | hello-world-i-dont-like | hello-world example                                                                                 |
 |            https-client | a https client running within enclaves                                                              |
-prost-based-protobuf | a demo of using protobuf implemented by the prost library
+|           massive-stdio | test the maximum buffer size of arguments in ecalls/ocalls                                          |
+|    prost-based-protobuf | a demo of using protobuf implemented by the prost library                                           |
 |              tls-server | a TLS server running within enclaves                                                                |
 
 ## FYI
