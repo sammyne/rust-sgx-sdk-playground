@@ -35,9 +35,6 @@ extern crate prost;
 use sgx_types::*;
 use sgx_urts::SgxEnclave;
 
-use std::ffi::{self, CString};
-use std::os::raw::c_char;
-
 use prost::Message;
 
 mod person {
@@ -112,7 +109,7 @@ fn main() {
         email: "david@foo.com".to_string(),
     };
 
-    let mut david_vec = Vec::new();
+    let mut david_vec = Vec::<u8>::new();
     david
         .encode(&mut david_vec)
         .expect("fail to encode person using protobuf");

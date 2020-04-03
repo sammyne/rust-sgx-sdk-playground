@@ -5,8 +5,8 @@ authors = ["sammyne <lixiangmin01@baidu.com>"]
 build = "build.rs"
 
 [dependencies]
-sgx_types = { git = "https://github.com/apache/teaclave-sgx-sdk", rev = "v1.1.0" }
-sgx_urts = { git = "https://github.com/apache/teaclave-sgx-sdk", rev = "v1.1.0" }
+sgx_types = { git = "https://github.com/apache/teaclave-sgx-sdk", rev = "v1.1.1" }
+sgx_urts = { git = "https://github.com/apache/teaclave-sgx-sdk", rev = "v1.1.1" }
 
 prost = "0.6"
 prost-types = "0.6"

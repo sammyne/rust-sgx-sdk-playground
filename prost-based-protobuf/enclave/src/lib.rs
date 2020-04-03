@@ -9,10 +9,7 @@ extern crate prost;
 extern crate prost_types;
 
 use sgx_types::*;
-use std::io::{self, Write};
 use std::slice;
-use std::string::String;
-use std::vec::Vec;
 
 use prost::Message;
 use prost_types::Timestamp;

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 
 ExternalProject_Add(teaclave-sgx-sdk
     GIT_REPOSITORY https://github.com/apache/incubator-teaclave-sgx-sdk
-    GIT_TAG v1.1.0
+    GIT_TAG v1.1.1
     GIT_PROGRESS true
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/third_party/teaclave-sgx-sdk
     UPDATE_DISCONNECTED true
