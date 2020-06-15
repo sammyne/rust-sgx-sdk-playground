@@ -8,7 +8,7 @@ include(cmake/git.cmake)
 include(cmake/sgx.cmake)
 
 #add_subdirectory(crypto)
-#add_subdirectory(hello-world)
+add_subdirectory(hello-world)
 #add_subdirectory(hello-world-debug)
 #add_subdirectory(hello-world-i-dont-like)
 #add_subdirectory(https-client)

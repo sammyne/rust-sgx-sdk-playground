@@ -5,9 +5,8 @@ authors = ["sammyne <lixiangmin01@baidu.com>"]
 build = "build.rs"
 
 [dependencies]
-sgx_types = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk", rev = "v1.1.0" }
-sgx_urts = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk", rev = "v1.1.0" }
-dirs = "1.0.2"
+sgx_types   = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk", rev = "v1.1.2" }
+sgx_urts    = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk", rev = "v1.1.2" }
 
 [build-dependencies]
-cc = "1.0.45"
+cc = "1.0.50"
