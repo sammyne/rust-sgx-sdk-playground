@@ -50,6 +50,7 @@ make run-hello-world
 | hello-world-i-dont-like | hello-world example                                                                                 |
 |            https-client | a https client running within enclaves                                                              |
 |           massive-stdio | test the maximum buffer size of arguments in ecalls/ocalls                                          |
+mini-ecdh | demonstrate how to do ECDH
 |    prost-based-protobuf | a demo of using protobuf implemented by the prost library                                           |
 |              tls-server | a TLS server running within enclaves                                                                |
 

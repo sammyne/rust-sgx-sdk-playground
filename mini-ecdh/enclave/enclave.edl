@@ -1,0 +1,11 @@
+enclave {
+    from "sgx_tstd.edl" import *;
+    from "sgx_stdio.edl" import *;
+    from "sgx_backtrace.edl" import *;
+    from "sgx_tstdc.edl" import *;
+
+    trusted {
+        // const cannot be used for array types
+        public void ecall_must_ecdh([in]  uint8_t alice_pub_key[64]);
+    };
+};
