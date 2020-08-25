@@ -1,0 +1,16 @@
+[package]
+name = "app"
+version = "1.0.0"
+authors = ["sammyne <lixiangmin01@baidu.com>"]
+build = "build.rs"
+
+[dependencies]
+sgx_types   = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk", rev = "v1.1.2" }
+sgx_urts    = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk", rev = "v1.1.2" }
+
+[build-dependencies]
+cc = "1.0.50"
+
+[patch."https://github.com/apache/incubator-teaclave-sgx-sdk"]
+sgx_types = { git = "https://gitee.com/sammyne/incubator-teaclave-sgx-sdk", rev = "v1.1.2" }
+sgx_urts  = { git = "https://gitee.com/sammyne/incubator-teaclave-sgx-sdk", rev = "v1.1.2" }

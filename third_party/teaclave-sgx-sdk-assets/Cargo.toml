@@ -1,0 +1,11 @@
+[package]
+name = "teaclave-sgx-sdk-assets"
+version = "0.1.0"
+authors = ["lixiangmin01 <lixiangmin01@baidu.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies.sgx_edl]
+git = "https://gitee.com/sammyne/incubator-teaclave-sgx-sdk"
+tag = "v1.1.2"

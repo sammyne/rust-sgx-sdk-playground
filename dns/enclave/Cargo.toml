@@ -1,0 +1,23 @@
+[package]
+name = "enclave"
+version = "1.0.0"
+authors = ["sammyne <lixiangmin01@baidu.com>"]
+
+[lib]
+name = "enclave"
+crate-type = ["staticlib"]
+
+[features]
+default = []
+
+[dependencies]
+sgx_types = { git = "https://github.com/apache/incubator-teaclave-sgx-sdk", rev = "v1.1.2" }
+
+[dependencies.sgx_tstd]
+features=["net"]
+git = "https://github.com/apache/incubator-teaclave-sgx-sdk"
+rev = "v1.1.2"
+
+[patch."https://github.com/apache/incubator-teaclave-sgx-sdk"]
+sgx_types = { git = "https://gitee.com/sammyne/incubator-teaclave-sgx-sdk", rev = "v1.1.2" }
+sgx_tstd  = { git = "https://gitee.com/sammyne/incubator-teaclave-sgx-sdk", rev = "v1.1.2" }
